@@ -102,6 +102,46 @@ body.auth-locked #authGate{display:flex}
 .noteActionBtn{border:0;border-radius:11px;padding:11px 15px;font-weight:700;cursor:pointer;color:#fff;background:var(--primary);font-size:14px}
 .noteActionBtn.share{background:#0f9d70}
 @media print{body *{visibility:hidden!important}#content,#content *{visibility:visible!important}#content{position:absolute;left:0;top:0;width:100%;padding:0!important}.noteActions,button,.quizBox,.quizBtn{display:none!important}.card{box-shadow:none!important;border:0!important}}
+
+.svAdminGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:16px 0}
+.svAdminBox{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--card)}
+.svAdminBox h3{margin-bottom:10px;color:var(--primary)}
+.svAdmin label{display:block;margin:10px 0 5px;font-weight:700}
+.svToolbar{display:flex;flex-wrap:wrap;gap:6px;padding:9px;background:#eef1ff;border-radius:10px;margin:8px 0}
+.svToolbar button,.svToolbar select{padding:8px 10px;border:1px solid #cbd5e1;border-radius:7px;background:white}
+.svRichEditor{min-height:260px;padding:16px;border:1px solid #aab4cc;border-radius:10px;background:white;color:#202638;line-height:1.7;outline:none;overflow-wrap:anywhere}
+.svRichEditor:focus{border-color:var(--primary);box-shadow:0 0 0 3px #4f46e522}
+.svRichEditor img{max-width:100%;height:auto}
+.svMediaGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:14px 0}
+.svMediaGrid>div{padding:12px;border:1px solid var(--line);border-radius:10px}
+.svHint{font-size:13px;color:var(--muted);margin-top:8px}
+.svVideo{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;margin:12px 0}
+.svVideo iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+#content a{color:var(--primary);font-weight:700}
+
+</style>
+
+<style id="sv-professional-clean-overrides">
+:root{--radius:16px}
+header .htitle p{opacity:.88;font-size:12px;letter-spacing:.2px}
+.headerActions{gap:8px}
+.headerActions button{font-weight:700;min-height:38px}
+.svHomeTitle{font-size:24px;font-weight:850;letter-spacing:-.3px;margin:18px 4px}
+.svBookGrid{display:grid;grid-template-columns:minmax(0,560px);gap:16px;justify-content:center;padding:8px}
+.svBookCard{border:1px solid #e2e8f0;border-radius:18px;box-shadow:0 8px 26px rgba(15,23,42,.07);padding:24px;text-align:left;transition:transform .18s,box-shadow .18s}
+.svBookCard:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(15,23,42,.11)}
+.svBookCard h3{font-size:19px;margin:10px 0 4px}
+.svBookCard p{color:var(--muted);margin:0 0 12px}
+.svBookCard>span{display:inline-flex;margin-top:12px;padding:9px 14px;border-radius:10px;background:var(--primary);color:#fff;font-weight:800}
+.svBookChapterPanel{border:1px solid #e2e8f0;border-radius:18px;box-shadow:0 8px 26px rgba(15,23,42,.06)}
+.svAdminCard{border:1px solid #e2e8f0;border-radius:20px;box-shadow:0 10px 32px rgba(15,23,42,.07)}
+.svAdminTop h2{font-size:24px;letter-spacing:-.4px}
+.svAdminNotice{border-radius:12px}
+.svQuickActions{gap:12px}
+.svQuickAction{border:1px solid rgba(148,163,184,.22);border-radius:14px;min-height:118px;box-shadow:0 4px 12px rgba(15,23,42,.04)}
+.svAdminToolPanels{margin-top:18px}
+.svToolPanel{border:1px solid #e2e8f0;border-radius:16px;padding:18px;background:#fff}
+@media(max-width:600px){.hrow{flex-wrap:wrap}.headerActions{width:100%;justify-content:flex-end}.svAdminTop{gap:12px;flex-wrap:wrap}.svQuickAction{min-height:100px}}
 </style>
 </head>
 <body>
@@ -121,7 +161,7 @@ body.auth-locked #authGate{display:flex}
     <button id="menuBtn" onclick="toggleSb()">☰</button>
     <div class="htitle">
       <h1 id="chTitle" title="StudyVerse">📘 StudyVerse — COPA Smart Learning</h1>
-      <p>StudyVerse — COPA Smart Learning Platform</p>
+      <p>ITI COPA · Study Material &amp; Practice</p>
     </div>
     <div class="headerActions"><button onclick="showDashboard()">🏠 Home</button><button id="adminLoginButton" onclick="svOpenAdminLogin()">🔐 Admin Login</button><button id="adminButton" onclick="openAdmin()" style="display:none">⚙️ Admin</button><button id="logoutButton" onclick="svSignOut()" style="display:none">Logout</button></div>
   </div>
@@ -131,7 +171,7 @@ body.auth-locked #authGate{display:flex}
 
 <div id="overlay" onclick="toggleSb()"></div>
 <nav id="sidebar">
-  <div class="sbHead"><h2>📚 COPA — Chapter 1</h2><p>Introduction to Computer — Index</p></div>
+  <div class="sbHead"><h2>📚 COPA Chapters</h2><p>अपना अध्याय चुनें</p></div>
   <div id="sbList"></div>
 </nav>
 
@@ -145,6 +185,21 @@ body.auth-locked #authGate{display:flex}
 </main>
 
 <script>
+
+// One-time cleanup of temporary catalogue entries created during testing.
+// This preserves future edits after the first clean launch.
+try {
+  if (!localStorage.getItem('sv_final_catalogue_clean_v2')) {
+    localStorage.removeItem('sv_books');
+    localStorage.removeItem('sv_admin_data');
+    localStorage.removeItem('sv_topic_edits');
+    localStorage.removeItem('sv_done');
+    localStorage.removeItem('sv_answered');
+    localStorage.removeItem('sv_scores');
+    localStorage.removeItem('sv_last');
+    localStorage.setItem('sv_final_catalogue_clean_v2', '1');
+  }
+} catch (e) { console.warn('Temporary demo data cleanup skipped', e); }
 
 const CH1_TOPICS = [
 {n:"COPA क्या है?",hi:"ट्रेड का परिचय",icon:"💻",html:`
@@ -1020,6 +1075,16 @@ quiz:[{q:"Chapter के पूरे revision के लिए सबसे त
 ];
 
 // ==================== CHAPTER 3: COMPUTER SOFTWARE ====================
+
+const CH2_ENRICHMENT = [{"name":"What is Computer?","story":"किराने की दुकान पर अमित ने सामान और कीमतें कंप्यूटर में दर्ज कीं। कंप्यूटर ने कुल जोड़ा, बिल स्क्रीन पर दिखाया और रिकॉर्ड सेव किया। इससे उसे Input, Processing, Output और Storage का क्रम समझ आया।","q1":"कंप्यूटर में दिए गए डेटा को क्या कहते हैं?","o1":["Input","Output","Storage"],"a1":0,"q2":"कंप्यूटर का परिणाम किस चरण में मिलता है?","o2":["Processing","Output","Input"],"a2":1},{"name":"Characteristics of Computer","story":"स्कूल के कार्यालय में कंप्यूटर ने सैकड़ों विद्यार्थियों के परिणाम जल्दी तैयार किए। लगातार काम करने की क्षमता उसकी Diligence और तेजी उसकी Speed दिखाती है। लेकिन गलत अंक डालने पर परिणाम भी गलत आया।","q1":"तेजी से काम करने की विशेषता क्या कहलाती है?","o1":["Accuracy","Speed","Storage"],"a1":1,"q2":"लगातार बिना थके काम करने की विशेषता क्या है?","o2":["Diligence","Versatility","Automation"],"a2":0},{"name":"Limitations of Computer","story":"एक विद्यार्थी ने कंप्यूटर से अपने आप सही निर्णय लेने की उम्मीद की। शिक्षक ने बताया कि कंप्यूटर निर्देशों पर काम करता है; सही निर्णय और उद्देश्य तय करने में इंसान की भूमिका जरूरी है।","q1":"कंप्यूटर की एक सीमा क्या है?","o1":["खुद से सोचकर निर्णय नहीं लेता","डेटा स्टोर नहीं कर सकता","इनपुट नहीं ले सकता"],"a1":0,"q2":"GIGO का अर्थ क्या है?","o2":["Good Input Good Output","Garbage In Garbage Out","General Input General Output"],"a2":1},{"name":"Basic Computer Operations","story":"ऑनलाइन फॉर्म भरते समय छात्र ने नाम टाइप किया, CPU ने निर्देशानुसार प्रक्रिया की, स्क्रीन पर परिणाम आया और फाइल सेव हुई। इस उदाहरण में Input, Processing, Output और Storage सभी दिखाई दिए।","q1":"डेटा दर्ज करने का चरण कौन-सा है?","o1":["Input","Output","Storage"],"a1":0,"q2":"अस्थायी या स्थायी रूप से डेटा रखने का कार्य क्या है?","o2":["Processing","Storage","Control"],"a2":1},{"name":"Functional Units of Computer","story":"कंप्यूटर की कार्यात्मक इकाइयों का चार्ट बनाते समय नेहा ने Input Unit, CPU, Output Unit और Storage Unit को अलग-अलग दिखाया। उसने CPU के अंदर CU, ALU और Registers भी लिखे।","q1":"कंप्यूटर की मुख्य कार्यात्मक इकाइयों में कौन शामिल है?","o1":["Input Unit","Water Unit","Fuel Unit"],"a1":0,"q2":"गणितीय और तार्किक कार्य कौन करता है?","o2":["CU","ALU","Monitor"],"a2":1},{"name":"Hardware, Software और Firmware","story":"कंप्यूटर की दुकान में राहुल ने उपकरणों को Hardware, चलाने वाले प्रोग्राम को Software और हार्डवेयर में मौजूद नियंत्रक प्रोग्राम को Firmware के रूप में पहचाना। तीनों की भूमिका अलग है, लेकिन सिस्टम में साथ काम करते हैं।","q1":"कंप्यूटर का छू सकने वाला भाग क्या कहलाता है?","o1":["Software","Hardware","Firmware"],"a1":1,"q2":"डिवाइस के अंदर स्थायी नियंत्रण निर्देशों से जुड़ा शब्द क्या है?","o2":["Firmware","Spreadsheet","Browser"],"a2":0},{"name":"History of Computer","story":"संग्रहालय में कंप्यूटर इतिहास की प्रदर्शनी देखकर मीना ने अबेकस से लेकर आधुनिक कंप्यूटर तक के विकास को समझा। अलग-अलग युगों में गणना के साधन और तकनीक बदलते गए।","q1":"कंप्यूटर के इतिहास का अध्ययन किस बात को समझाता है?","o1":["तकनीक का विकास","केवल गेम","केवल प्रिंटिंग"],"a1":0,"q2":"अबेकस किससे संबंधित पुराना साधन है?","o2":["गणना","चित्र प्रोजेक्शन","ध्वनि रिकॉर्डिंग"],"a2":0},{"name":"Generations of Computer","story":"कक्षा में शिक्षक ने कंप्यूटर की पीढ़ियों का चार्ट दिखाया। हर पीढ़ी में मुख्य इलेक्ट्रॉनिक तकनीक बदली और कंप्यूटर आकार, गति तथा क्षमता में विकसित हुए।","q1":"पहली पीढ़ी के कंप्यूटरों में मुख्यतः किसका उपयोग हुआ?","o1":["Vacuum Tubes","Microprocessors"," केवल Touch Screen"],"a1":0,"q2":"चौथी पीढ़ी किस तकनीक से जुड़ी है?","o2":["Microprocessor","Vacuum Tube","Abacus"],"a2":0},{"name":"Classification of Computer","story":"एक संस्थान ने मौसम का अध्ययन करने के लिए बड़े कंप्यूटर, कार्यालय में सामान्य काम के लिए माइक्रो कंप्यूटर और विशेष नियंत्रण के लिए एम्बेडेड कंप्यूटर का उपयोग किया। जरूरत के अनुसार कंप्यूटर का वर्ग चुना गया।","q1":"कंप्यूटर का वर्गीकरण किस आधार पर हो सकता है?","o1":["आकार और क्षमता","केवल रंग","केवल ब्रांड"],"a1":0,"q2":"व्यक्तिगत उपयोग में आम तौर पर कौन-सा कंप्यूटर आता है?","o2":["Microcomputer","Supercomputer","Mainframe only"],"a2":0},{"name":"Uses of Computer","story":"अस्पताल में कंप्यूटर से मरीजों का रिकॉर्ड रखा गया, बैंक में लेन-देन दर्ज हुए और स्कूल में पढ़ाई कराई गई। इससे स्पष्ट हुआ कि कंप्यूटर का उपयोग अनेक क्षेत्रों में होता है।","q1":"कंप्यूटर का उपयोग किस क्षेत्र में होता है?","o1":["बैंकिंग","शिक्षा","दोनों"],"a1":2,"q2":"अस्पताल में कंप्यूटर का एक उपयोग क्या है?","o2":["मरीजों का रिकॉर्ड","खेत जोतना","दीवार रंगना"],"a2":0},{"name":"Input Devices (परिचय)","story":"कंप्यूटर लैब में प्रशिक्षक ने समझाया कि Input Devices उपयोगकर्ता से डेटा और निर्देश कंप्यूटर तक पहुँचाते हैं। Keyboard, mouse और scanner इसके उदाहरण हैं।","q1":"Input Device का मुख्य काम क्या है?","o1":["डेटा कंप्यूटर में देना","परिणाम प्रिंट करना","ध्वनि सुनाना"],"a1":0,"q2":"इनमें से कौन Input Device है?","o2":["Keyboard","Monitor","Speaker"],"a2":0},{"name":"Keyboard","story":"सोनू ने रिपोर्ट लिखने के लिए Keyboard पर अक्षर और संख्याएँ टाइप कीं। Enter से नई पंक्ति शुरू की और Backspace से गलती सुधारी।","q1":"Keyboard किस प्रकार का उपकरण है?","o1":["Input","Output","Storage"],"a1":0,"q2":"कौन-सी कुंजी नई पंक्ति या आदेश स्वीकार करने में सामान्यतः काम आती है?","o2":["Enter","Shift","Caps Lock"],"a2":0},{"name":"Mouse","story":"डेस्कटॉप पर फाइल चुनने के लिए रिया ने Mouse को हिलाया, Pointer स्क्रीन पर चला और उसने क्लिक करके फाइल खोली। Scroll wheel से पेज ऊपर-नीचे किया।","q1":"Mouse का स्क्रीन पर चलने वाला संकेत क्या कहलाता है?","o1":["Pointer","Pixel","Folder"],"a1":0,"q2":"किस क्रिया से सामान्यतः किसी वस्तु का चयन होता है?","o2":["Click","Print","Scan"],"a2":0},{"name":"Light Pen","story":"डिजाइन लैब में Light Pen से स्क्रीन पर सीधे एक बिंदु चुना गया। शिक्षक ने बताया कि यह प्रकाश-संवेदी इनपुट उपकरण है और पुराने कंप्यूटर सिस्टमों में इसका उपयोग होता था।","q1":"Light Pen किस प्रकार का उपकरण है?","o1":["Input","Output","Storage"],"a1":0,"q2":"Light Pen का उपयोग किसलिए किया जाता था?","o2":["स्क्रीन पर स्थान चुनने/चित्र बनाने","आवाज बढ़ाने","कागज प्रिंट करने"],"a2":0},{"name":"Touch Screen","story":"टिकट काउंटर पर कर्मचारी ने Touch Screen पर विकल्प को उंगली से छुआ और टिकट का प्रकार चुना। स्क्रीन ने स्पर्श को इनपुट के रूप में पहचाना।","q1":"Touch Screen किसका संयोजन है?","o1":["Display और Input","Printer और Speaker","RAM और ROM"],"a1":0,"q2":"Touch Screen पर चयन कैसे किया जाता है?","o2":["स्क्रीन छूकर","कागज डालकर","माइक में बोलकर ही"],"a2":0},{"name":"Joystick","story":"वीडियो गेम खेलते समय अर्जुन ने Joystick को अलग-अलग दिशाओं में घुमाकर गेम के पात्र को चलाया। Joystick दिशा और गति से जुड़े नियंत्रण देने वाला Input Device है।","q1":"Joystick का सामान्य उपयोग किसमें होता है?","o1":["गेम नियंत्रण","कागज स्कैन","ध्वनि आउटपुट"],"a1":0,"q2":"Joystick किस श्रेणी में आता है?","o2":["Input Device","Output Device","Storage Device"],"a2":0},{"name":"Microphone","story":"ऑनलाइन मीटिंग में छात्र ने Microphone से अपनी आवाज कंप्यूटर तक पहुँचाई। सॉफ्टवेयर ने आवाज को रिकॉर्ड किया और मीटिंग में भेजा।","q1":"Microphone किस प्रकार का डेटा ग्रहण करता है?","o1":["ध्वनि","मुद्रित पेज","बारकोड"],"a1":0,"q2":"Microphone किस श्रेणी का उपकरण है?","o2":["Input","Output","Storage"],"a2":0},{"name":"OCR — Optical Character Reader","story":"पुस्तकालय में OCR सॉफ्टवेयर ने स्कैन किए गए पेज की छपी हुई लिखावट को पहचानकर संपादन योग्य टेक्स्ट में बदला। इससे पुस्तक की सामग्री खोजने योग्य बनी।","q1":"OCR का पूरा नाम क्या है?","o1":["Optical Character Recognition","Output Code Reader","Open Computer Record"],"a1":0,"q2":"OCR का मुख्य काम क्या है?","o2":["छपे अक्षरों को पहचानकर टेक्स्ट बनाना","आवाज बजाना","चित्र प्रोजेक्ट करना"],"a2":0},{"name":"Scanner","story":"कार्यालय में पुराने कागजी प्रमाणपत्र को Scanner से डिजिटल फाइल बनाया गया। कर्मचारी ने फाइल को कंप्यूटर में सेव करके रिकॉर्ड में जोड़ा।","q1":"Scanner किसका डिजिटल रूप बना सकता है?","o1":["कागजी दस्तावेज़","केवल आवाज","केवल तापमान"],"a1":0,"q2":"Scanner किस श्रेणी में आता है?","o2":["Input Device","Output Device","Processing Unit"],"a2":0},{"name":"Barcode Reader / QR Scanner","story":"दुकान पर उत्पाद का Barcode स्कैन किया गया और कंप्यूटर में उसका नाम व कीमत खुल गई। QR Scanner से लिंक या अन्य जानकारी भी पढ़ी जा सकती है।","q1":"Barcode Reader का मुख्य कार्य क्या है?","o1":["कोड पढ़कर डेटा देना","कागज प्रिंट करना","आवाज रिकॉर्ड करना"],"a1":0,"q2":"QR Code में किस तरह की जानकारी हो सकती है?","o2":["वेबसाइट लिंक या अन्य डेटा","केवल बिजली","केवल ध्वनि"],"a2":0},{"name":"Biometric Sensor","story":"कार्यालय में कर्मचारी ने Biometric Sensor पर अधिकृत फिंगरप्रिंट दिया। सिस्टम ने पहले से दर्ज नमूने से मिलान करके पहचान सत्यापित की।","q1":"Biometric Sensor किस आधार पर पहचान कर सकता है?","o1":["शारीरिक/जैविक विशेषता","कंप्यूटर का रंग","कीबोर्ड का आकार"],"a1":0,"q2":"इनमें से कौन biometric उदाहरण है?","o2":["Fingerprint","Monitor","Printer"],"a2":0},{"name":"Web Camera","story":"ऑनलाइन कक्षा में Web Camera ने शिक्षक का वीडियो कंप्यूटर तक पहुँचाया। कैमरा दृश्य को डिजिटल रूप में कैप्चर करके वीडियो कॉल में उपयोग हुआ।","q1":"Web Camera किस प्रकार का इनपुट देता है?","o1":["चित्र और वीडियो","केवल प्रिंट","केवल टेक्स्ट आउटपुट"],"a1":0,"q2":"Web Camera किस श्रेणी का उपकरण है?","o2":["Input","Output","Storage"],"a2":0},{"name":"Output Devices (परिचय)","story":"प्रेजेंटेशन के दौरान कंप्यूटर ने स्लाइड Monitor पर दिखाई और Printer से कागजी प्रति निकाली। शिक्षक ने बताया कि Output Devices प्रोसेस किए गए परिणाम उपयोगकर्ता तक पहुँचाते हैं।","q1":"Output Device का काम क्या है?","o1":["परिणाम उपयोगकर्ता तक पहुँचाना","डेटा दर्ज करना","निर्देश प्रोसेस करना"],"a1":0,"q2":"इनमें से कौन Output Device है?","o2":["Monitor","Keyboard","Mouse"],"a2":0},{"name":"Monitor","story":"लैब में नीलम ने Monitor पर टेक्स्ट, चित्र और वीडियो देखा। उसने Resolution और स्क्रीन आकार के बारे में भी सीखा।","q1":"Monitor किस प्रकार का उपकरण है?","o1":["Output","Input","Storage"],"a1":0,"q2":"Monitor पर चित्र किन छोटे बिंदुओं से बनते हैं?","o2":["Pixels","Bytes","Folders"],"a2":0},{"name":"Impact Printers","story":"पुराने प्रिंटर में कागज पर अक्षर बनाने के लिए प्रिंट हेड रिबन पर प्रहार करता था। शिक्षक ने इसे Impact Printer बताया और Dot Matrix को उदाहरण के रूप में समझाया।","q1":"Impact Printer छपाई कैसे करता है?","o1":["प्रहार/impact से","स्याही की बूंदें बिना संपर्क","लेज़र प्रकाश से ही"],"a1":0,"q2":"Dot Matrix किस प्रकार का प्रिंटर है?","o2":["Impact","Non-Impact","Plotter"],"a2":0},{"name":"Non-Impact Printers","story":"घर के Inkjet Printer ने कागज पर स्याही की छोटी बूंदों से फोटो बनाई। यह Non-Impact Printer है क्योंकि छपाई में कागज पर प्रहार नहीं किया जाता।","q1":"Inkjet Printer किस श्रेणी में आता है?","o1":["Non-Impact","Impact","Input"],"a1":0,"q2":"Laser Printer किस प्रकार का प्रिंटर है?","o2":["Non-Impact","Impact","Storage"],"a2":0},{"name":"Plotter","story":"आर्किटेक्ट ने बड़े आकार का नक्शा Plotter से तैयार कराया। Plotter तकनीकी ड्रॉइंग और बड़े ग्राफिक्स के लिए उपयोगी होता है।","q1":"Plotter का उपयोग मुख्यतः किसलिए होता है?","o1":["बड़े नक्शे/ड्रॉइंग","आवाज रिकॉर्ड","डेटा टाइप"],"a1":0,"q2":"Plotter किस प्रकार का उपकरण है?","o2":["Output","Input","Memory"],"a2":0},{"name":"Speaker और Headphone","story":"वीडियो देखते समय कंप्यूटर की आवाज Speaker से कमरे में सुनाई दी, जबकि Headphone से एक विद्यार्थी ने निजी तौर पर सुना। दोनों ध्वनि आउटपुट देते हैं।","q1":"Speaker किस प्रकार का उपकरण है?","o1":["Output","Input","Storage"],"a1":0,"q2":"Headphone का उपयोग किसलिए होता है?","o2":["ध्वनि सुनने","दस्तावेज़ स्कैन","डेटा टाइप"],"a2":0},{"name":"Projector","story":"कक्षा में Projector ने कंप्यूटर की स्लाइड बड़ी स्क्रीन पर दिखाई ताकि सभी विद्यार्थी देख सकें। यह दृश्य जानकारी को बड़े पर्दे पर प्रस्तुत करता है।","q1":"Projector किस प्रकार का उपकरण है?","o1":["Output","Input","Storage"],"a1":0,"q2":"Projector का मुख्य उपयोग क्या है?","o2":["बड़ी सतह पर दृश्य दिखाना","आवाज रिकॉर्ड करना","डेटा स्टोर करना"],"a2":0},{"name":"Memory — परिचय","story":"कंप्यूटर बंद होने पर भी कुछ डेटा स्थायी रूप से स्टोर रहता है, जबकि काम के दौरान कुछ डेटा अस्थायी मेमोरी में रहता है। शिक्षक ने बताया कि Memory डेटा और निर्देशों को रखने की व्यवस्था है।","q1":"Memory का मुख्य कार्य क्या है?","o1":["डेटा/निर्देश रखना","केवल प्रिंट करना","केवल आवाज देना"],"a1":0,"q2":"कौन-सी मेमोरी सामान्यतः अस्थायी होती है?","o2":["RAM","ROM","DVD"],"a2":0},{"name":"RAM — Random Access Memory","story":"कंप्यूटर पर काम करते समय खुली फाइलें RAM में रहती हैं। बिजली बंद होने पर RAM का डेटा सामान्यतः मिट जाता है, इसलिए जरूरी फाइल सेव करना आवश्यक है।","q1":"RAM का पूरा नाम क्या है?","o1":["Random Access Memory","Read Access Machine","Rapid Action Module"],"a1":0,"q2":"RAM किस प्रकार की मेमोरी है?","o2":["Volatile","Non-volatile","Optical"],"a2":0},{"name":"ROM — Read Only Memory","story":"कंप्यूटर शुरू होने के लिए जरूरी निर्देश ROM या अन्य non-volatile firmware storage में रखे जा सकते हैं। बिजली बंद होने पर भी ROM का डेटा सामान्यतः बना रहता है।","q1":"ROM का पूरा नाम क्या है?","o1":["Read Only Memory","Random Output Machine","Run Only Module"],"a1":0,"q2":"ROM सामान्यतः किस प्रकार की मेमोरी है?","o2":["Non-volatile","Volatile","Cache only"],"a2":0},{"name":"Cache Memory","story":"CPU बार-बार उपयोग होने वाले डेटा को Cache Memory में रख सकता है, जिससे उसे मुख्य मेमोरी तक हर बार जाने की जरूरत कम होती है। इससे कुछ प्रक्रियाएँ तेज हो सकती हैं।","q1":"Cache Memory का उद्देश्य क्या है?","o1":["बार-बार उपयोग होने वाले डेटा तक तेज पहुँच","कागज प्रिंट करना","वीडियो रिकॉर्ड करना"],"a1":0,"q2":"Cache सामान्यतः किसके निकट/साथ काम करती है?","o2":["CPU","Printer","Keyboard"],"a2":0},{"name":"Magnetic Storage","story":"पुराने कंप्यूटर में Hard Disk के अंदर चुंबकीय सतह पर डेटा रिकॉर्ड किया जाता था। इसे Magnetic Storage कहा जाता है।","q1":"Hard Disk Drive किस प्रकार के स्टोरेज का उदाहरण है?","o1":["Magnetic","Optical","Paper"],"a1":0,"q2":"Magnetic Storage में डेटा किस सिद्धांत से दर्ज होता है?","o2":["चुंबकीय गुण","प्रकाशीय डिस्क रीडिंग","ध्वनि तरंग"],"a2":0},{"name":"Optical Storage","story":"संगीत और सॉफ्टवेयर की CD/DVD में लेज़र की मदद से डेटा पढ़ा जाता है। इसलिए CD और DVD Optical Storage के उदाहरण हैं।","q1":"CD किस प्रकार का स्टोरेज है?","o1":["Optical","Magnetic","Volatile"],"a1":0,"q2":"Optical Disc को पढ़ने में किसका उपयोग होता है?","o2":["Laser light","Magnetic tape","Touch sensor"],"a2":0},{"name":"Solid State Storage","story":"विद्यार्थी ने USB Flash Drive में प्रोजेक्ट सेव किया। इसमें moving parts नहीं होते और डेटा flash memory में रखा जाता है, इसलिए यह Solid State Storage है।","q1":"Pen Drive किस प्रकार का स्टोरेज है?","o1":["Solid State","Optical","Impact"],"a1":0,"q2":"SSD का पूरा नाम क्या है?","o2":["Solid State Drive","Simple Storage Disk","System Software Device"],"a2":0},{"name":"Memory Units","story":"कंप्यूटर कक्षा में शिक्षक ने Bit, Byte, KB, MB और GB का चार्ट बनाया। विद्यार्थियों ने समझा कि डेटा की मात्रा बताने के लिए Memory Units उपयोग होती हैं।","q1":"एक Byte में कितने Bits होते हैं?","o1":["8","4","16"],"a1":0,"q2":"इनमें सामान्यतः सबसे बड़ी इकाई कौन-सी है?","o2":["GB","KB","Byte"],"a2":0},{"name":"Motherboard","story":"कंप्यूटर खोलने के बजाय मदरबोर्ड के चित्र से विद्यार्थियों ने CPU socket, RAM slots और विस्तार स्लॉट पहचाने। Motherboard अलग-अलग घटकों को जोड़ने वाला मुख्य circuit board है।","q1":"Motherboard क्या है?","o1":["मुख्य circuit board","एक प्रिंटर","एक एप्लिकेशन"],"a1":0,"q2":"RAM सामान्यतः किसमें लगाई जाती है?","o2":["Motherboard के memory slot में","Monitor में","Speaker में"],"a2":0},{"name":"Microprocessor","story":"कंप्यूटर में Microprocessor निर्देशों को execute करता है और गणना तथा नियंत्रण से जुड़े कार्य करता है। शिक्षक ने इसे CPU का मुख्य processing chip बताया।","q1":"Microprocessor का मुख्य कार्य क्या है?","o1":["निर्देशों को execute करना","कागज स्कैन करना","आवाज सुनाना"],"a1":0,"q2":"CPU का विस्तार क्या है?","o2":["Central Processing Unit","Computer Personal Utility","Central Print Unit"],"a2":0}];
+CH2_ENRICHMENT.forEach(x=>{
+ const t=TOPICS.find(z=>z.n===x.name); if(!t) return;
+ t.html += `<div class="storyBox" style="background:#eff8ff;border-left:4px solid #0284c7;padding:14px;border-radius:12px;margin:14px 0"><b>📖 समझने वाली कहानी</b><p>${x.story}</p><p><b>सीख:</b> ${x.name} की भूमिका और उपयोग को उदाहरण के साथ याद रखें।</p></div>`;
+ t.quiz=(t.quiz||[]).concat([{q:x.q1,o:x.o1,a:x.a1},{q:x.q2,o:x.o2,a:x.a2}]);
+});
+const ch2FinalTest={n:'Chapter 2 — Final Combined Test',hi:'पूरे अध्याय की अंतिम परीक्षा',icon:'🏆',html:`<div class="def"><b>Final Test:</b> Chapter 2 के सभी मुख्य विषयों से 39 अभ्यास प्रश्न।</div>`,quiz:[]};
+TOPICS.slice(0,-1).forEach(t=>{if(t.quiz&&t.quiz.length){const q=t.quiz[0];ch2FinalTest.quiz.push({q:`[${t.n}] ${q.q}`,o:q.o,a:q.a});}});
+TOPICS.push(ch2FinalTest);
 const CH3_TOPICS = [
 {
 n:"Chapter in a View", hi:"इस चैप्टर में पढ़ेंगे क्या?", icon:"🗺️",
@@ -1639,6 +1704,60 @@ quiz:[{q:"Chapter 3 का सबसे तेज revision कैसे कर�
 ];
 
 // ==================== CHAPTERS ====================
+// Chapter 1 enrichment: topic-specific stories, extra quizzes and a combined test.
+const CH1_ENRICHMENT = [{"name": "COPA क्या है?", "story": "रवि ने ITI में COPA चुना। पहले दिन उसने सोचा कि केवल टाइपिंग सीखनी होगी। शिक्षक ने उसे फाइल बनाना, डेटा संभालना और छोटे प्रोग्राम के निर्देश समझाए। तब रवि को समझ आया कि COPA कंप्यूटर चलाने के साथ समस्या हल करने की बुनियादी समझ भी देता है।", "q1": "COPA में मुख्य रूप से क्या सीखा जाता है?", "o1": ["केवल मोबाइल रिपेयर", "कंप्यूटर ऑपरेशन और प्रोग्रामिंग की बुनियाद", "केवल बिजली वायरिंग"], "a1": 1, "q2": "कंप्यूटर को काम कराने के लिए क्या चाहिए?", "o2": ["निर्देश", "केवल रंग", "कवर"], "a2": 0}, {"name": "Scope of COPA", "story": "नेहा के मोहल्ले में एक दुकान को ऑनलाइन फॉर्म, प्रिंट और रिकॉर्ड संभालने में मदद चाहिए थी। COPA में सीखी टाइपिंग और दस्तावेज़ कौशल से उसे शुरुआती कंप्यूटर-संबंधी काम समझने में मदद मिली। आगे अनुभव और अतिरिक्त कौशल से नए अवसर खुल सकते हैं।", "q1": "Data Entry Operator का मुख्य काम क्या है?", "o1": ["डेटा दर्ज करना और व्यवस्थित रखना", "कंप्यूटर का रंग बदलना", "बिजली बनाना"], "a1": 0, "q2": "Cyber Café किसका उदाहरण हो सकता है?", "o2": ["स्वरोजगार", "केवल खेल", "हार्डवेयर का पुर्जा"], "a2": 0}, {"name": "Progression Pathways", "story": "अमन ने COPA के बाद सीधे नौकरी मान लेने के बजाय Apprenticeship के बारे में जानकारी ली। उसने समझा कि प्रशिक्षण, अनुभव और आगे की पढ़ाई से कौशल बढ़ता है। हर रास्ते की पात्रता और चयन की शर्तें अलग हो सकती हैं।", "q1": "Apprenticeship का उद्देश्य क्या है?", "o1": ["काम करते हुए व्यावहारिक अनुभव लेना", "परीक्षा से बचना", "कंप्यूटर बंद रखना"], "a1": 0, "q2": "CITS किससे संबंधित है?", "o2": ["Crafts Instructor Training Scheme", "Computer Internet Typing Service", "Central Input Tool System"], "a2": 0}, {"name": "Safety क्या है?", "story": "लैब में प्रवेश करते समय सिया ने फर्श पर पानी देखा। उसने उस जगह से दूर रहकर शिक्षक को बताया। छोटी सावधानी से फिसलने और उपकरणों को नुकसान पहुँचने का जोखिम कम हुआ। यही Safety का उद्देश्य है।", "q1": "Safety का मुख्य उद्देश्य क्या है?", "o1": ["दुर्घटना और नुकसान का जोखिम कम करना", "जल्दी में काम करना", "नियमों को अनदेखा करना"], "a1": 0, "q2": "खतरा दिखे तो सही कदम क्या है?", "o2": ["अनदेखा करना", "सुरक्षित दूरी रखकर जिम्मेदार व्यक्ति को बताना", "दूसरों को छूने देना"], "a2": 1}, {"name": "Computer Lab Safety Rules", "story": "लैब में प्रवेश से पहले शिक्षक ने बताया कि हाथ सूखे रखें, तारों से छेड़छाड़ न करें और खाने-पीने की चीजें कंप्यूटर से दूर रखें। विद्यार्थियों ने नियम अपनाए, जिससे उपकरण और लोग दोनों सुरक्षित रहे।", "q1": "गीले हाथों से बिजली के उपकरण छूना चाहिए?", "o1": ["हाँ", "नहीं", "केवल जल्दी में"], "a1": 1, "q2": "खाने-पीने की चीजें कहाँ रखनी चाहिए?", "o2": ["कीबोर्ड के पास", "कंप्यूटर से दूर", "CPU के ऊपर"], "a2": 1}, {"name": "Safety Symbols", "story": "लैब के दरवाजे पर ⚡ का चिन्ह देखकर मोहित ने समझा कि वहाँ बिजली का खतरा हो सकता है। उसने चेतावनी को पढ़ा और बिना अनुमति उपकरण नहीं छुआ। Safety Symbols खतरे और सावधानी को जल्दी पहचानने में मदद करते हैं।", "q1": "⚡ चिन्ह सामान्यतः क्या बताता है?", "o1": ["बिजली का खतरा", "पीने का पानी", "निकास मार्ग"], "a1": 0, "q2": "Safety Symbol देखने पर क्या करना चाहिए?", "o2": ["उसका अर्थ समझकर सावधानी बरतनी चाहिए", "उसे सजावट समझना चाहिए", "चिन्ह हटाना चाहिए"], "a2": 0}, {"name": "Fire Triangle", "story": "शिक्षक ने समझाया कि आग बने रहने के लिए Heat, Fuel और Oxygen तीनों की जरूरत होती है। इन्हें Fire Triangle कहते हैं। इनमें से किसी एक तत्व को हटाने से आग बुझाने की प्रक्रिया में मदद मिल सकती है; वास्तविक आग में प्रशिक्षित सहायता लें।", "q1": "Fire Triangle के तीन तत्व कौन-से हैं?", "o1": ["Heat, Fuel, Oxygen", "Water, Smoke, Sand", "Light, Metal, Dust"], "a1": 0, "q2": "Fire Triangle में कौन-सा तत्व शामिल नहीं है?", "o2": ["Heat", "Fuel", "Water"], "a2": 2}, {"name": "Causes of Fire in Laboratory", "story": "एक लैब में एक ही एक्सटेंशन बोर्ड पर बहुत सारे उपकरण जोड़ने की योजना बनी। प्रशिक्षक ने इसे रोका और बताया कि क्षमता से अधिक लोड तथा खराब तार गर्म होकर आग का जोखिम बढ़ा सकते हैं। उपकरणों की जाँच योग्य व्यक्ति से करानी चाहिए।", "q1": "Overloaded Circuit का अर्थ क्या है?", "o1": ["क्षमता से अधिक विद्युत भार", "कम रोशनी", "धीमा इंटरनेट"], "a1": 0, "q2": "लैब में खराब तार दिखे तो क्या करें?", "o2": ["खुद खोलकर ठीक करें", "उपयोग रोककर जिम्मेदार व्यक्ति को बताएं", "पानी डालें"], "a2": 1}, {"name": "Types of Fire", "story": "प्रशिक्षक ने चार्ट पर लकड़ी, पेट्रोल, गैस और धातु से जुड़ी आग के वर्ग समझाए। उसने बताया कि अलग-अलग ईंधन के लिए आग की श्रेणी और उपयुक्त अग्निशमन व्यवस्था अलग हो सकती है। सही पहचान प्रशिक्षित व्यक्ति और स्थानीय मानक के अनुसार जरूरी है।", "q1": "लकड़ी और कागज की आग सामान्यतः किस class में आती है?", "o1": ["Class A", "Class B", "Class D"], "a1": 0, "q2": "ज्वलनशील तरल की आग सामान्यतः किस class में आती है?", "o2": ["Class A", "Class B", "Class D"], "a2": 1}, {"name": "Fire Extinguishers", "story": "लैब में अग्निशामक यंत्रों के लेबल पढ़कर विद्यार्थियों ने जाना कि हर extinguisher हर प्रकार की आग के लिए नहीं होता। प्रशिक्षक ने जोर दिया कि सही यंत्र का चयन प्रशिक्षण और सुरक्षा निर्देशों के अनुसार ही होना चाहिए।", "q1": "CO₂ का पूरा नाम क्या है?", "o1": ["Carbon Dioxide", "Carbon Oxygen", "Calcium Dioxide"], "a1": 0, "q2": "अग्निशामक यंत्र चुनते समय क्या देखना चाहिए?", "o2": ["आग की श्रेणी और यंत्र का लेबल", "केवल उसका रंग", "उसका वजन ही"], "a2": 0}, {"name": "ITI, CTS, NCVT और SCVT का परिचय", "story": "पूजा ने ITI में दाखिले से पहले CTS और NCVT/SCVT के नाम सुने। काउंसलर ने समझाया कि ये व्यावसायिक प्रशिक्षण और प्रमाणन व्यवस्था से जुड़े शब्द हैं। उसने आधिकारिक सूचना से संस्थान और ट्रेड की मान्यता जाँची।", "q1": "CTS का संबंध किससे है?", "o1": ["Craftsmen Training Scheme", "Computer Typing Software", "Central Trade Salary"], "a1": 0, "q2": "संस्थान की मान्यता की जानकारी कहाँ जाँचनी चाहिए?", "o2": ["आधिकारिक स्रोत से", "केवल अफवाह से", "बिना जाँच"], "a2": 0}, {"name": "Personal Protective Equipment (PPE)", "story": "वर्कशॉप में काम शुरू करने से पहले प्रशिक्षक ने काम के अनुसार PPE पहनने को कहा। विद्यार्थियों ने समझा कि PPE जोखिम कम करने में मदद करता है, लेकिन यह सुरक्षित कार्य-प्रणाली और प्रशिक्षण का विकल्प नहीं है।", "q1": "PPE का पूरा नाम क्या है?", "o1": ["Personal Protective Equipment", "Personal Program Entry", "Public Protection Engine"], "a1": 0, "q2": "PPE चुनने का आधार क्या होना चाहिए?", "o2": ["काम से जुड़ा जोखिम", "फैशन", "रंग की पसंद"], "a2": 0}, {"name": "Electrical Safety", "story": "कंप्यूटर लैब में एक प्लग ढीला था। विद्यार्थी ने उसे खुद ठीक करने के बजाय बिजली बंद रखने और प्रशिक्षक को सूचना देने का निर्णय लिया। बिजली से जुड़े मरम्मत कार्य योग्य व्यक्ति को ही करने चाहिए।", "q1": "बिजली के उपकरणों की मरम्मत किसे करनी चाहिए?", "o1": ["योग्य व्यक्ति को", "किसी भी विद्यार्थी को", "बिना बिजली बंद किए"], "a1": 0, "q2": "क्षतिग्रस्त तार दिखे तो क्या करें?", "o2": ["उसे छूकर जाँचें", "उपयोग रोककर सूचना दें", "उस पर पानी डालें"], "a2": 1}, {"name": "First Aid का परिचय", "story": "खेल के समय एक विद्यार्थी को हल्की चोट लगी। शिक्षक ने जगह सुरक्षित की और संस्थान की प्राथमिक उपचार प्रक्रिया अपनाई। जरूरत पड़ने पर चिकित्सा सहायता बुलाना भी प्राथमिक उपचार का हिस्सा है; गंभीर स्थिति में प्रशिक्षित मदद जरूरी है।", "q1": "First Aid का अर्थ क्या है?", "o1": ["चिकित्सा सहायता मिलने से पहले दी जाने वाली प्रारंभिक मदद", "लंबा ऑपरेशन", "दवा का व्यापार"], "a1": 0, "q2": "गंभीर चोट की स्थिति में क्या जरूरी है?", "o2": ["चिकित्सा सहायता बुलाना", "घटना छिपाना", "बिना प्रशिक्षण इलाज करना"], "a2": 0}, {"name": "Emergency Exit और Evacuation", "story": "मॉक ड्रिल में अलार्म बजते ही कक्षा ने धक्का-मुक्की नहीं की। सभी ने संकेतित निकास मार्ग से शांतिपूर्वक बाहर जाकर निर्धारित स्थान पर एकत्र होना सीखा। Evacuation का मतलब सुरक्षित तरीके से स्थान खाली करना है।", "q1": "Emergency Exit किसलिए होता है?", "o1": ["आपात स्थिति में बाहर निकलने के लिए", "सामान रखने के लिए", "कक्षा बंद करने के लिए"], "a1": 0, "q2": "Evacuation के समय कैसा व्यवहार होना चाहिए?", "o2": ["शांत और निर्देशानुसार", "धक्का-मुक्की", "वापस सामान लेने जाना"], "a2": 0}, {"name": "Ergonomics और सही बैठने की स्थिति", "story": "लगातार कंप्यूटर पर काम करते हुए रोहन की गर्दन में असुविधा हुई। प्रशिक्षक ने स्क्रीन को उचित ऊँचाई पर रखने, पीठ को सहारा देने और बीच-बीच में विराम लेने की सलाह दी। यही Ergonomics का व्यावहारिक उपयोग है।", "q1": "Ergonomics का उद्देश्य क्या है?", "o1": ["काम की जगह को व्यक्ति के अनुकूल बनाना", "कंप्यूटर की गति घटाना", "स्क्रीन सजाना"], "a1": 0, "q2": "लंबे समय तक काम करते समय क्या उपयोगी है?", "o2": ["उचित मुद्रा और छोटे विराम", "बिना रुके बैठे रहना", "स्क्रीन के बहुत पास बैठना"], "a2": 0}, {"name": "Housekeeping और 5S", "story": "लैब बंद करने से पहले टीम ने केबल व्यवस्थित किए, कचरा हटाया और उपकरण उनकी तय जगह पर रखे। अगली कक्षा को साफ और सुरक्षित जगह मिली। 5S कार्यस्थल को व्यवस्थित रखने की पद्धति है।", "q1": "Housekeeping का मुख्य लाभ क्या है?", "o1": ["साफ और सुरक्षित कार्यस्थल", "अधिक अव्यवस्था", "उपकरण खोना"], "a1": 0, "q2": "5S किससे संबंधित है?", "o2": ["कार्यस्थल संगठन और अनुशासन", "केवल कंप्यूटर प्रोग्रामिंग", "नेटवर्क स्पीड"], "a2": 0}, {"name": "Accident Reporting और Near Miss", "story": "एक विद्यार्थी फिसलने से बच गया, लेकिन फर्श गीला था। उसने चोट न लगने के बावजूद घटना बताई। ऐसी Near Miss रिपोर्ट से कारण पहचाने जा सकते हैं और भविष्य की दुर्घटना रोकने में मदद मिलती है।", "q1": "Near Miss क्या है?", "o1": ["ऐसी घटना जिसमें दुर्घटना होते-होते बची", "निश्चित छुट्टी", "कंप्यूटर की त्रुटि"], "a1": 0, "q2": "Near Miss की रिपोर्ट क्यों करनी चाहिए?", "o2": ["भविष्य का जोखिम कम करने के लिए", "किसी को दोष देने के लिए", "रिकॉर्ड मिटाने के लिए"], "a2": 0}, {"name": "Environmental Safety और E-Waste", "story": "पुराना कीबोर्ड और खराब बैटरी सामान्य कूड़े में डालने के बजाय अधिकृत ई-कचरा संग्रह व्यवस्था में जमा किए गए। इससे पर्यावरण और स्वास्थ्य पर पड़ने वाले नुकसान को कम करने में मदद मिलती है।", "q1": "E-Waste किसे कहते हैं?", "o1": ["त्यागे गए इलेक्ट्रॉनिक उपकरण और उनके भाग", "रसोई का कचरा", "कागज की कॉपी"], "a1": 0, "q2": "पुराने इलेक्ट्रॉनिक सामान का सही निपटान कैसे करें?", "o2": ["अधिकृत संग्रह/रीसाइक्लिंग व्यवस्था से", "खुले में जला दें", "नदी में फेंक दें"], "a2": 0}, {"name": "Computer Lab में सुरक्षित व्यवहार", "story": "कक्षा खत्म होने पर विद्यार्थियों ने लॉगआउट किया, अपनी फाइलें सुरक्षित कीं और उपकरणों को निर्देशानुसार बंद किया। उन्होंने कुर्सियाँ व्यवस्थित रखीं और किसी समस्या की सूचना प्रशिक्षक को दी। इससे अगली कक्षा के लिए लैब तैयार रही।", "q1": "लैब छोड़ने से पहले क्या करना उचित है?", "o1": ["निर्देशानुसार लॉगआउट और उपकरण बंद करना", "खुले खाते छोड़ना", "केबल खींचना"], "a1": 0, "q2": "उपकरण में समस्या दिखे तो क्या करें?", "o2": ["प्रशिक्षक/जिम्मेदार व्यक्ति को बताएं", "खोलकर प्रयोग करें", "अनदेखा करें"], "a2": 0}];
+CH1_ENRICHMENT.forEach(x=>{
+ const t=CH1_TOPICS.find(z=>z.n===x.name); if(!t) return;
+ t.html += `<div class="storyBox" style="background:#f3f0ff;border-left:4px solid #7c3aed;padding:14px;border-radius:12px;margin:14px 0"><b>📖 समझने वाली कहानी</b><p>${x.story}</p><p><b>सीख:</b> ${x.name} का सही अर्थ समझकर रोज़मर्रा के काम में सावधानी और समझदारी से लागू करें।</p></div>`;
+ t.quiz=(t.quiz||[]).concat([{q:x.q1,o:x.o1,a:x.a1},{q:x.q2,o:x.o2,a:x.a2}]);
+});
+const ch1FinalTest={n:'Chapter 1 — Final Combined Test',hi:'पूरे अध्याय की अंतिम परीक्षा',icon:'🏆',html:`<div class="def"><b>Final Test:</b> इस अभ्यास में Chapter 1 के सभी मुख्य विषयों से प्रश्न हैं। प्रत्येक प्रश्न में एक सही विकल्प चुनें।</div>` ,quiz:[]};
+CH1_TOPICS.slice(0,-1).forEach(t=>{if(t.quiz&&t.quiz.length){const q=t.quiz[0];ch1FinalTest.quiz.push({q:`[${t.n}] ${q.q}`,o:q.o,a:q.a});}});
+CH1_TOPICS.push(ch1FinalTest);
+
+const CH3_ENRICHMENT = [
+["Software क्या होता है?","रवि ने कंप्यूटर में Calculator खोला। स्क्रीन और कीबोर्ड को वह छू सकता था, लेकिन Calculator के निर्देश दिखाई नहीं देते। उसने समझा कि हार्डवेयर उपकरण हैं और सॉफ्टवेयर उन्हें काम करने के निर्देश देता है।","Software किसका समूह है?",["निर्देशों और प्रोग्रामों का","केवल तारों का","केवल स्क्रीन का"],0,"Calculator किसका उदाहरण है?",["Software","Hardware","केबल"],0],
+["Classification of Software","कंप्यूटर लैब में शिक्षक ने सॉफ्टवेयर को दो मुख्य समूहों में बाँटा—System Software और Application Software। एक कंप्यूटर को चलाने में मदद करता है, दूसरा उपयोगकर्ता के काम पूरे करता है।","सॉफ्टवेयर के दो मुख्य वर्ग कौन-से हैं?",["System और Application","Input और Output","RAM और ROM"],0,"उपयोगकर्ता का काम कराने वाला सॉफ्टवेयर सामान्यतः क्या कहलाता है?",["Application Software","Device Cable","Firmware Screw"],0],
+["System Software","कंप्यूटर चालू होने पर कई पृष्ठभूमि प्रक्रियाएँ काम करती हैं। मीना ने जाना कि System Software कंप्यूटर के हार्डवेयर को नियंत्रित करने और दूसरे प्रोग्राम चलाने का आधार देता है।","System Software का मुख्य काम क्या है?",["कंप्यूटर के संचालन में मदद","केवल चित्र बनाना","केवल गाने चलाना"],0,"Operating System किसका उदाहरण है?",["System Software","Application Software","Document"],0],
+["Operating System","अमन ने एक साथ ब्राउज़र, म्यूजिक प्लेयर और फाइल मैनेजर खोले। Operating System ने मेमोरी और उपकरणों के उपयोग को व्यवस्थित किया और उसे प्रोग्रामों के साथ काम करने का इंटरफेस दिया।","Operating System का एक मुख्य कार्य क्या है?",["संसाधनों का प्रबंधन","कागज छापना बिना प्रिंटर","बिजली बनाना"],0,"इनमें से कौन OS है?",["Windows","MS Word","Paint Image"],0],
+["Language Processor","एक प्रोग्रामर ने उच्च स्तरीय भाषा में प्रोग्राम लिखा। कंप्यूटर उसे सीधे उसी रूप में नहीं समझता, इसलिए भाषा प्रोसेसर उसे मशीन के समझने योग्य रूप में बदलने में मदद करता है।","Language Processor का उद्देश्य क्या है?",["प्रोग्राम भाषा का अनुवाद","स्क्रीन साफ करना","फाइल प्रिंट करना"],0,"Assembler, Compiler और Interpreter किसके उदाहरण हैं?",["Language Processor","Input Device","Storage Media"],0],
+["Assembler","नेहा ने Assembly Language में निर्देश लिखे। Assembler ने उन mnemonic निर्देशों को मशीन भाषा के निर्देशों में बदला, ताकि प्रोसेसर उन्हें समझ सके।","Assembler किस भाषा का अनुवाद करता है?",["Assembly Language","केवल हिंदी कहानी","HTML रंग"],0,"Assembler का आउटपुट सामान्यतः क्या होता है?",["Machine/Object Code","Audio","Printed Page"],0],
+["Interpreter","एक भाषा सीखने वाले विद्यार्थी ने देखा कि Interpreter प्रोग्राम को पढ़ते हुए निर्देशों का अनुवाद और निष्पादन क्रमशः करता है। इससे त्रुटि वाले हिस्से की पहचान करना आसान हो सकता है।","Interpreter सामान्यतः कैसे काम करता है?",["एक-एक statement का अनुवाद/निष्पादन","पूरी किताब छापता है","डिस्क साफ करता है"],0,"Interpreter किसका उदाहरण है?",["Language Translator","Output Device","Antivirus"],0],
+["Compiler","कक्षा में शिक्षक ने बताया कि Compiler पूरे source program को अनुवाद की प्रक्रिया से गुजारकर object/executable code तैयार कर सकता है। फिर बने प्रोग्राम को चलाया जाता है।","Compiler सामान्यतः किसका अनुवाद करता है?",["पूरे source program का","केवल एक अक्षर का","केवल फोटो का"],0,"Compiler किस श्रेणी में आता है?",["Language Processor","Utility Hardware","Input Unit"],0],
+["Difference: Compiler vs Interpreter","दो विद्यार्थियों ने अनुवाद के तरीके की तुलना की। एक में पूरा प्रोग्राम अनुवादित होकर अलग कोड बन सकता है, जबकि दूसरे में निर्देश क्रमशः translate और execute होते हैं।","Interpreter सामान्यतः कैसे निष्पादन करता है?",["क्रमशः statement के अनुसार","पूरे प्रोग्राम को पहले ही एक साथ","कभी नहीं"],0,"Compiler और Interpreter में मुख्य अंतर किससे जुड़ा है?",["अनुवाद और निष्पादन के तरीके से","मॉनिटर के आकार से","कीबोर्ड के रंग से"],0],
+["Device Driver","प्रिंटर कंप्यूटर से जुड़ा था, लेकिन सही ड्राइवर के बिना वह ठीक से काम नहीं कर रहा था। ड्राइवर स्थापित होने पर Operating System और प्रिंटर के बीच संवाद संभव हुआ।","Device Driver किसमें मदद करता है?",["OS को हार्डवेयर से संवाद कराने में","कागज बनाने में","इंटरनेट बिल भरने में"],0,"Printer Driver किसका उदाहरण है?",["Device Driver","Spreadsheet","Compiler"],0],
+["Utility Software","सिया ने फाइलों का बैकअप लिया और सुरक्षा जाँच के लिए यूटिलिटी प्रोग्राम इस्तेमाल किया। शिक्षक ने समझाया कि Utility Software सिस्टम के रखरखाव, सुरक्षा और प्रबंधन में मदद करता है।","Utility Software का उद्देश्य क्या है?",["सिस्टम रखरखाव और प्रबंधन","केवल गेम खेलना","केवल स्लाइड दिखाना"],0,"Antivirus सामान्यतः किस श्रेणी में रखा जाता है?",["Utility Software","Input Device","Operating System"],0],
+["Compression Tool","रोहन को कई दस्तावेज़ ईमेल से भेजने थे। उसने फाइलों को ZIP archive में संपीड़ित किया, जिससे उन्हें एक पैकेज में व्यवस्थित करना और साझा करना आसान हुआ।","Compression Tool क्या करता है?",["फाइल का आकार घटाने/पैक करने में मदद","मॉनिटर का आकार बढ़ाता","कंप्यूटर बंद करता"],0,"ZIP किससे संबंधित है?",["Compressed Archive","Operating System","Processor"],0],
+["Disk Defragmenter","पुरानी हार्ड डिस्क में फाइलों के हिस्से अलग-अलग स्थानों पर बिखरे हो सकते हैं। Defragmentation उन्हें अधिक क्रमबद्ध करने में मदद कर सकता है; यह पारंपरिक HDD के संदर्भ में उपयोगी है।","Defragmenter मुख्यतः किसके लिए उपयोगी है?",["HDD पर बिखरे डेटा को व्यवस्थित करने","वायरस बनाने","दस्तावेज़ टाइप करने"],0,"Defragmentation का संबंध किससे है?",["Disk organization","Audio recording","Presentation theme"],0],
+["Antivirus","कंप्यूटर पर संदिग्ध फाइल मिलने पर एंटीवायरस ने चेतावनी दी। उपयोगकर्ता ने फाइल खोलने के बजाय सुरक्षा जाँच की। Antivirus हानिकारक सॉफ्टवेयर पहचानने और उससे सुरक्षा में मदद करता है।","Antivirus का मुख्य उद्देश्य क्या है?",["Malware से सुरक्षा में मदद","वीडियो एडिट करना","डेटा टाइप करना"],0,"संदिग्ध फाइल मिलने पर क्या उचित है?",["सुरक्षा चेतावनी को ध्यान से जाँचना","हर चेतावनी अनदेखी करना","अज्ञात फाइल तुरंत चलाना"],0],
+["Text Editor","कबीर ने साधारण टेक्स्ट फाइल में छोटे नोट लिखे। Text Editor ने बिना जटिल पेज लेआउट के plain text लिखने और संपादित करने की सुविधा दी।","Text Editor का मुख्य उपयोग क्या है?",["Plain text लिखना और संपादित करना","वीडियो चलाना","हार्डवेयर जोड़ना"],0,"Notepad किसका उदाहरण है?",["Text Editor","Compiler","Device Driver"],0],
+["Backup Software","पूजा ने अपनी जरूरी फाइलों की दूसरी कॉपी अलग सुरक्षित स्थान पर रखी। कंप्यूटर खराब होने पर बैकअप से डेटा वापस पाने में मदद मिल सकती है।","Backup क्यों बनाया जाता है?",["डेटा की अतिरिक्त सुरक्षित कॉपी रखने","फाइल मिटाने","स्क्रीन चमकाने"],0,"बैकअप कहाँ रखना बेहतर है?",["मूल डिवाइस से अलग सुरक्षित स्थान पर","उसी फाइल के ऊपर","केवल Recycle Bin में"],0],
+["Application Software","एक विद्यार्थी ने दस्तावेज़ बनाया, दूसरे ने चित्र संपादित किया। दोनों ने ऐसे प्रोग्राम इस्तेमाल किए जो सीधे उपयोगकर्ता के काम में मदद करते हैं—इन्हें Application Software कहते हैं।","Application Software किसके लिए बनाया जाता है?",["विशिष्ट उपयोगकर्ता कार्यों के लिए","केवल कंप्यूटर चालू करने के लिए","बिजली आपूर्ति के लिए"],0,"Word Processor किस श्रेणी में आता है?",["Application Software","System Unit","Device Driver"],0],
+["General Purpose Application Software","स्कूल में अलग-अलग विद्यार्थी Word, Spreadsheet और Presentation प्रोग्राम इस्तेमाल करते हैं। ये सामान्य कामों के लिए बने होते हैं, इसलिए इन्हें General Purpose Applications कहा जाता है।","General Purpose Software किस काम आता है?",["कई सामान्य कार्यों के लिए","केवल एक होटल के लिए","केवल एक मशीन के लिए"],0,"Spreadsheet किसका उदाहरण है?",["General Purpose Application","Device Driver","Boot Loader"],0],
+["Word Processor","रवि ने आवेदन पत्र टाइप किया, शीर्षक bold किया और पेज का स्वरूप बदला। Word Processor दस्तावेज़ बनाने, संपादित करने और प्रारूपित करने में मदद करता है।","Word Processor का मुख्य उपयोग क्या है?",["दस्तावेज़ बनाना और संपादित करना","डेटाबेस सर्वर चलाना","डिस्क विभाजन करना"],0,"MS Word किसका उदाहरण है?",["Word Processor","Antivirus","Assembler"],0],
+["Presentation Software","टीम ने प्रोजेक्ट समझाने के लिए स्लाइडों में शीर्षक, चित्र और चार्ट लगाए। Presentation Software जानकारी को स्लाइड के रूप में प्रस्तुत करने में मदद करता है।","Presentation Software किसलिए उपयोग होता है?",["Slides बनाने और दिखाने","फाइल compress करने","ड्राइवर स्थापित करने"],0,"PowerPoint किसका उदाहरण है?",["Presentation Software","DBMS","Operating System"],0],
+["Spreadsheet","दुकान के मालिक ने बिक्री और खर्च की सूची बनाई। Spreadsheet में rows, columns और formulas की मदद से गणना और डेटा विश्लेषण किया जा सकता है।","Spreadsheet में डेटा किस रूप में व्यवस्थित होता है?",["Rows और Columns","केवल स्लाइड","केवल पैराग्राफ"],0,"Spreadsheet में formula किस काम आता है?",["गणना करने","कंप्यूटर boot करने","वायरस हटाने"],0],
+["Database Management System (DBMS)","लाइब्रेरी में हजारों किताबों का रिकॉर्ड रखना था। DBMS ने रिकॉर्ड को व्यवस्थित रखने, खोजने और अपडेट करने में मदद की।","DBMS का मुख्य काम क्या है?",["डेटाबेस बनाना और प्रबंधित करना","स्लाइड डिजाइन करना","स्क्रीन साफ करना"],0,"SQL किससे जुड़ी भाषा है?",["Database","Audio Editing","Device Driver"],0],
+["Specific Purpose Application Software","एक अस्पताल ने मरीजों के रिकॉर्ड के लिए विशेष सॉफ्टवेयर लिया। यह एक खास क्षेत्र की जरूरतों के अनुसार बनाया गया, इसलिए Specific Purpose Application कहलाता है।","Specific Purpose Software किसके लिए बनाया जाता है?",["विशेष कार्य या क्षेत्र के लिए","हर सामान्य कार्य के लिए","केवल OS चलाने के लिए"],0,"Hospital Management System किसका उदाहरण है?",["Specific Purpose Application","Assembler","Text Editor"],0],
+["Inventory Management System","दुकानदार ने सामान की आवक-जावक और उपलब्ध मात्रा का रिकॉर्ड रखा। Inventory System ने स्टॉक की स्थिति समझने में मदद की।","Inventory System किसे प्रबंधित करता है?",["सामान/स्टॉक","कर्मचारियों की छुट्टी मात्र","कंप्यूटर की RAM"],0,"Stock कम होने पर यह सिस्टम क्या करने में मदद कर सकता है?",["रीऑर्डर की जरूरत पहचानने","OS बदलने","स्क्रीन बंद करने"],0],
+["Human Resource Management System (HRMS)","एक कार्यालय में कर्मचारियों की जानकारी, उपस्थिति और छुट्टियों का रिकॉर्ड अलग-अलग फाइलों में था। HRMS ने मानव संसाधन से जुड़े रिकॉर्ड एक जगह व्यवस्थित करने में मदद की।","HRMS किससे संबंधित है?",["कर्मचारी/मानव संसाधन प्रबंधन","स्टॉक की कीमत","कंप्यूटर booting"],0,"HRMS में कौन-सा रिकॉर्ड हो सकता है?",["कर्मचारी उपस्थिति","प्रिंटर का रंग","वीडियो resolution"],0],
+["Payroll System","कार्यालय के लेखा विभाग ने कर्मचारियों के वेतन की गणना और payslip तैयार करने के लिए Payroll System का उपयोग किया।","Payroll System का मुख्य काम क्या है?",["वेतन की गणना और रिकॉर्ड","होटल कमरे आवंटित करना","फाइल compress करना"],0,"Payslip किससे जुड़ी होती है?",["वेतन विवरण","डिस्क defragmentation","प्रेजेंटेशन"],0],
+["Financial Accounting","छोटे व्यवसाय ने आय, खर्च और लेन-देन का रिकॉर्ड रखा। Financial Accounting Software इन वित्तीय रिकॉर्ड को व्यवस्थित करने और रिपोर्ट बनाने में मदद करता है।","Financial Accounting Software किसे संभालता है?",["वित्तीय लेन-देन और खाते","डिवाइस ड्राइवर","ऑपरेटिंग सिस्टम boot"],0,"आय और खर्च का रिकॉर्ड किसका हिस्सा है?",["Financial Accounting","Compression","Text Editing"],0],
+["Hotel Management System","होटल के रिसेप्शन पर कमरे की उपलब्धता, बुकिंग और ग्राहक विवरण देखे जाते हैं। Hotel Management System इन कार्यों को व्यवस्थित करने में मदद करता है।","Hotel Management System किस काम आता है?",["होटल संचालन और बुकिंग प्रबंधन","कंप्यूटर भाषा अनुवाद","डिस्क सफाई"],0,"Room reservation किस सिस्टम का कार्य है?",["Hotel Management System","Compiler","Antivirus"],0],
+["Difference: System vs Application Software","कंप्यूटर में OS पृष्ठभूमि में संसाधन संभालता है, जबकि उपयोगकर्ता Word में पत्र लिखता है। दोनों सॉफ्टवेयर हैं, लेकिन उनके उद्देश्य अलग हैं।","Operating System किस प्रकार का सॉफ्टवेयर है?",["System Software","Application Software","Spreadsheet"],0,"MS Word किस प्रकार का सॉफ्टवेयर है?",["Application Software","System Software","Device Firmware"],0],
+["Basic Hardware & Software Issues (परिचय)","लैब में एक कंप्यूटर चालू नहीं हुआ। प्रशिक्षक ने पहले बिजली कनेक्शन और स्क्रीन संकेतों की जाँच की, फिर जरूरत होने पर तकनीकी सहायता ली। समस्या पहचानना और सुरक्षित तरीके से रिपोर्ट करना troubleshooting का हिस्सा है।","समस्या आने पर पहला उचित कदम क्या है?",["लक्षण समझकर सुरक्षित बुनियादी जाँच/रिपोर्ट","बिना जानकारी उपकरण खोलना","सभी फाइलें मिटाना"],0,"हार्डवेयर समस्या का उदाहरण क्या है?",["कीबोर्ड काम न करना","गलत वर्तनी","दस्तावेज़ का शीर्षक"],0],
+["Open Source Software (परिचय)","एक विद्यार्थी ने ऐसा प्रोग्राम चुना जिसका source code सार्वजनिक लाइसेंस के तहत उपलब्ध था। उसने जाना कि Open Source में लाइसेंस की शर्तों के अनुसार कोड देखना, बदलना और साझा करना संभव हो सकता है।","Open Source Software की प्रमुख विशेषता क्या है?",["लाइसेंस के अनुसार source code उपलब्ध होना","हमेशा मुफ्त होना जरूरी","कोड कभी नहीं देखा जा सकता"],0,"Open Source के उपयोग में किसका पालन जरूरी है?",["Software License","केवल स्क्रीन आकार","कंप्यूटर ब्रांड"],0],
+["Booting","कंप्यूटर का Power Button दबाने पर firmware शुरुआती जाँच और boot प्रक्रिया शुरू करता है। फिर OS लोड होकर कंप्यूटर को उपयोग के लिए तैयार करता है।","Booting किस प्रक्रिया को कहते हैं?",["कंप्यूटर शुरू होकर OS लोड होने की प्रक्रिया","दस्तावेज़ प्रिंट करना","फाइल rename करना"],0,"कंप्यूटर चालू होने के बाद कौन-सा सॉफ्टवेयर लोड होता है?",["Operating System","Spreadsheet Formula","Text File"],0]
+];
+CH3_ENRICHMENT.forEach(x=>{
+ const t=CH3_TOPICS.find(z=>z.n===x[0]); if(!t) return;
+ t.html += `<div class="storyBox" style="background:#f3f0ff;border-left:4px solid #7c3aed;padding:14px;border-radius:12px;margin:14px 0"><b>📖 समझने वाली कहानी</b><p>${x[1]}</p><p><b>सीख:</b> ${x[0]} को उदाहरण के साथ समझें और सही परिस्थिति में लागू करें।</p></div>`;
+ t.quiz=(t.quiz||[]).concat([{q:x[2],o:x[3],a:x[4]},{q:x[5],o:x[6],a:x[7]}]);
+});
+const ch3FinalTest={n:'Chapter 3 — Final Combined Test',hi:'पूरे अध्याय की अंतिम परीक्षा',icon:'🏆',html:`<div class="def"><b>Final Combined Test:</b> Chapter 3 के Software, Classification, Language Processor, Utility, Application, Issues, Open Source और Booting से जुड़े प्रश्न हल करें।</div>`,quiz:[]};
+CH3_ENRICHMENT.forEach(x=>ch3FinalTest.quiz.push({q:`[${x[0]}] ${x[2]}`,o:x[3],a:x[4]}));
+CH3_TOPICS.push(ch3FinalTest);
+
 const CH4_TOPICS = [
 {n:"ऑपरेटिंग सिस्टम (OS) क्या है?",hi:"हार्डवेयर और यूज़र के बीच मैनेजर",icon:"🖥️",html:`
 <div class="def"><b>Operating System (OS)</b> = वह <b>system software</b> जो computer के hardware और user के बीच में रहकर सारे काम manage करता है।</div>
@@ -1803,28 +1922,338 @@ quiz:[{q:"रुके हुए (hang) program को बंद करने �
 <div class="remember"><b>याद रखो:</b> यह सारा अध्याय "कंप्यूटर को चलाना" सिखाता है — अगले अध्याय में इसी कंप्यूटर पर Word जैसे काम सीखेंगे।</div>`,
 quiz:[{q:"निम्न में से कौन System Software है?",o:["Windows","MS Word","Google Chrome"],a:0},
 {q:"Recycle Bin से फाइल वापस लाने के लिए कौन-सा option दबाते हैं?",o:["Restore","Delete","Rename"],a:0}]}
+,
+{n:"OS के मुख्य कार्य — Device, Process, Memory और File Management",hi:"Operating System अंदर से क्या संभालता है",icon:"⚙️",html:`
+<div class="def"><b>Operating System</b> कंप्यूटर के संसाधनों का प्रबंधक है। यह केवल स्क्रीन दिखाने का काम नहीं करता; यह CPU, RAM, storage और जुड़े हुए devices के बीच तालमेल बनाता है।</div>
+<h3>1. Device Management</h3><p>Keyboard, mouse, printer, speaker और pen drive जैसे उपकरणों को OS तथा उनके device drivers के माध्यम से manage किया जाता है। OS यह देखता है कि किस device को कब काम करना है और data किस तरह भेजना है।</p>
+<ul><li><b>Speed:</b> अलग-अलग devices की गति अलग हो सकती है; OS उनके बीच तालमेल रखता है।</li><li><b>Unit of Transfer:</b> data byte, block या अन्य units में भेजा जा सकता है।</li><li><b>Data Representation:</b> devices के data format में अंतर हो सकता है।</li><li><b>Sharing:</b> कई programs एक printer जैसे shared device का उपयोग कर सकते हैं।</li><li><b>Buffering:</b> तेज और धीमे उपकरणों के बीच अस्थायी memory में data रखकर गति का अंतर संभालना।</li><li><b>Spooling:</b> print jobs को queue में लगाना, ताकि printer एक-एक करके काम करे।</li></ul>
+<h3>2. Process Management</h3><p>चल रहे program को process कहते हैं। OS CPU का समय अलग-अलग processes को देता है, ताकि music चलते हुए आप browser भी खोल सकें।</p>
+<h3>3. Memory Management</h3><p>OS RAM में चल रहे programs को जगह देता है और जरूरत पूरी होने पर memory वापस उपलब्ध कराता है।</p>
+<h3>4. Storage और File Management</h3><p>Storage में data कहाँ रखा जाएगा, और file/folder कैसे बनेंगे, खुलेंगे, rename या delete होंगे—इनका प्रबंधन OS करता है।</p>
+<div class="ex"><b>🎮 मजेदार उदाहरण:</b> मान लो ITI lab में 20 विद्यार्थी एक printer पर practical file print करना चाहते हैं। हर विद्यार्थी की file एक-एक करके queue में जाती है—यह spooling है। उधर computer थोड़ी देर के लिए data को buffer में रख सकता है, ताकि printer और computer की अलग गति के कारण काम अटक न जाए। साथ में browser और music चल रहे हों तो OS CPU time और RAM भी बाँटता है।</div>
+<div class="remember"><b>ध्यान दें:</b> Buffering अस्थायी data रखने की तकनीक है; Spooling में jobs को queue में रखकर क्रम से process किया जाता है।</div>`,quiz:[{q:"Print jobs को queue में रखने की प्रक्रिया क्या कहलाती है?",o:["Spooling","Formatting","Booting"],a:0},{q:"चल रहे program को क्या कहते हैं?",o:["Process","Folder","Driver"],a:0},{q:"किसका काम RAM में जगह बाँटना है?",o:["Memory Management","File Extension","Wallpaper"],a:0}]},
+{n:"Operating System के प्रकार",hi:"Batch से Real-Time तक",icon:"🧭",html:`
+<div class="def">Operating System को काम करने के तरीके और उपयोग के आधार पर अलग-अलग प्रकारों में बाँटा जाता है।</div>
+<table><tr><th>प्रकार</th><th>आसान अर्थ और उदाहरण</th></tr><tr><td><b>Batch OS</b></td><td>एक जैसे कामों को समूह (batch) में इकट्ठा करके चलाना।</td></tr><tr><td><b>Time-Sharing / Multitasking</b></td><td>CPU का समय बाँटकर कई users या programs को काम करने का मौका देना।</td></tr><tr><td><b>Distributed OS</b></td><td>कई जुड़े computers के resources को मिलाकर काम कराना।</td></tr><tr><td><b>Network OS</b></td><td>नेटवर्क पर जुड़े computers, users और shared resources को manage करना।</td></tr><tr><td><b>Real-Time OS</b></td><td>निर्धारित समय-सीमा में प्रतिक्रिया देना; नियंत्रण प्रणालियों में उपयोग।</td></tr></table>
+<div class="ex"><b>🚌 उदाहरण:</b> बस अड्डे पर दिनभर के टिकटों का हिसाब रात में एक साथ process करना Batch जैसा है। आपके फोन में music, maps और messages साथ चलना Multitasking है। अस्पताल की किसी monitoring/control व्यवस्था में समय पर प्रतिक्रिया जरूरी हो तो Real-Time OS उपयोगी हो सकता है।</div>
+<div class="remember"><b>याद रखो:</b> GUI और CLI user interface के तरीके हैं; Batch, Network, Distributed आदि OS के काम करने/उपयोग के प्रकार हैं।</div>`,quiz:[{q:"कई programs को CPU time बाँटकर चलाना किससे जुड़ा है?",o:["Time-Sharing","Batch only","BIOS password"],a:0},{q:"समय-सीमा में प्रतिक्रिया देने वाला OS कौन-सा है?",o:["Real-Time OS","Network OS","Batch OS"],a:0},{q:"नेटवर्क पर users और shared resources manage करने वाला OS?",o:["Network OS","Real-Time OS","Single file"],a:0}]},
+{n:"BIOS और POST",hi:"कंप्यूटर चालू होते समय क्या होता है",icon:"🔧",html:`
+<div class="def"><b>BIOS</b> (Basic Input/Output System) motherboard पर मौजूद firmware है, जो computer start होने पर शुरुआती hardware जाँच और boot प्रक्रिया शुरू करने में मदद करता है। नए computers में अक्सर UEFI firmware मिलता है।</div>
+<h3>POST क्या है?</h3><p><b>POST</b> का पूरा नाम Power-On Self-Test है। Power button दबाने पर firmware शुरुआती जाँच करता है—जैसे RAM और जरूरी hardware उपलब्ध हैं या नहीं। समस्या होने पर beep या error message मिल सकता है।</p>
+<h3>BIOS/UEFI में मिलने वाली settings</h3><ul><li>Boot order: किस device से पहले start करने की कोशिश हो।</li><li>Date और Time: system clock की setting।</li><li>Security: firmware password या Secure Boot जैसी सुविधाएँ, hardware के अनुसार।</li><li>Hardware monitoring: तापमान/fan की जानकारी; voltage या fan controls हर system में उपलब्ध नहीं होते।</li><li>Save & Exit: बदलाव सेव करके बाहर आना; Discard/Exit से बदलाव छोड़ना।</li></ul>
+<div class="ex"><b>🧰 उदाहरण:</b> सोचो computer एक दुकान है। दुकान खुलने से पहले चौकीदार ताला, बिजली और जरूरी सामान देखता है। POST भी startup पर जरूरी hardware की शुरुआती जाँच करता है। सब ठीक होने पर firmware boot device से operating system लोड करने की प्रक्रिया आगे बढ़ाता है।</div>
+<div class="remember"><b>सावधानी:</b> अनजान BIOS settings न बदलें। गलत बदलाव से boot समस्या हो सकती है। BIOS/UEFI में जाने की key brand के अनुसार अलग होती है।</div>`,quiz:[{q:"POST का मुख्य काम क्या है?",o:["Startup पर hardware की शुरुआती जाँच","Photo edit करना","Internet चलाना"],a:0},{q:"Boot order किसे तय करता है?",o:["किस device से boot की कोशिश पहले हो","Monitor का रंग","File का नाम"],a:0},{q:"आधुनिक systems में BIOS के स्थान पर अक्सर क्या मिलता है?",o:["UEFI","Paint","Recycle Bin"],a:0}]},
+{n:"Windows का इतिहास और संस्करण",hi:"Windows 95 से Windows 11 तक",icon:"🪟",html:`
+<p>Microsoft Windows एक लोकप्रिय graphical operating system family है। समय के साथ इसके कई versions आए और interface, security तथा hardware support में बदलाव हुए।</p>
+<table><tr><th>Version</th><th>पहचान / सीखने योग्य बात</th></tr><tr><td>Windows NT</td><td>व्यावसायिक/मजबूत Windows family की नींव।</td></tr><tr><td>Windows 95</td><td>Start menu और taskbar के लोकप्रिय रूप की शुरुआत।</td></tr><tr><td>Windows 98</td><td>Windows 95 के बाद आया desktop version।</td></tr><tr><td>Windows 2000</td><td>NT family पर आधारित version।</td></tr><tr><td>Windows ME</td><td>घर के उपयोगकर्ताओं के लिए Millennium Edition।</td></tr><tr><td>Windows XP</td><td>लंबे समय तक लोकप्रिय; अब unsupported और असुरक्षित।</td></tr><tr><td>Vista, 7, 8, 10</td><td>बाद के versions; हर version में interface/features बदले।</td></tr><tr><td>Windows 11</td><td>2026 में वर्तमान Windows desktop family का नया प्रमुख version।</td></tr></table>
+<div class="ex"><b>📚 उदाहरण:</b> जैसे किसी किताब के नए edition में layout और सुविधाएँ सुधरती हैं, वैसे ही Windows के नए versions में design, security और hardware compatibility बदलती रही। पुराने XP को आज internet-connected रोजमर्रा के computer पर इस्तेमाल करना ठीक नहीं, क्योंकि उसका security support समाप्त हो चुका है।</div>
+<div class="remember"><b>परीक्षा नोट:</b> आपके syllabus में XP और Windows 7 के desktop features पूछे जा सकते हैं; उन्हें ऐतिहासिक/पाठ्यक्रम के रूप में पढ़ें।</div>`,quiz:[{q:"Windows 95 किस सुविधा के लिए खास तौर पर जाना जाता है?",o:["Start menu और taskbar","Touchscreen only","Cloud gaming"],a:0},{q:"Windows XP आज किस स्थिति में है?",o:["Unsupported पुराना version","सबसे नया version","एक antivirus"],a:0},{q:"Windows किस प्रकार का software है?",o:["Operating System","Word Processor","Printer"],a:0}]},
+{n:"Windows XP Desktop और Window के भाग",hi:"Desktop से Title Bar तक",icon:"🖥️",html:`
+<p>Windows XP का desktop वह मुख्य screen है जो login/startup के बाद दिखाई देती है। इसमें Wallpaper, Start button, Taskbar और Icons जैसे भाग होते हैं।</p>
+<ul><li><b>Wallpaper:</b> Desktop की background image।</li><li><b>Start button/menu:</b> Programs, settings और shutdown options तक पहुँच।</li><li><b>Taskbar:</b> खुले programs और Start area दिखाने वाली पट्टी।</li><li><b>Icons:</b> files, folders, apps या shortcuts के छोटे चिन्ह।</li></ul>
+<h3>एक Window के भाग</h3><table><tr><th>भाग</th><th>काम</th></tr><tr><td>Title Bar</td><td>खुले program/document का नाम दिखाता है।</td></tr><tr><td>Caption Buttons</td><td>Minimize, Maximize/Restore और Close।</td></tr><tr><td>Menu Bar</td><td>File, Edit, View जैसे menus।</td></tr><tr><td>Toolbar</td><td>आम commands के buttons।</td></tr><tr><td>Scroll Bar</td><td>ऊपर-नीचे या दाएँ-बाएँ सामग्री देखने में मदद।</td></tr><tr><td>Status Bar</td><td>फाइल/दस्तावेज की स्थिति की जानकारी।</td></tr></table>
+<div class="ex"><b>🎬 उदाहरण:</b> Notepad में लंबा नोट खोलो। सबसे ऊपर Title Bar पर document का नाम दिखेगा। Close button दबाने से window बंद होगी, Minimize करने पर taskbar में जाएगी और Scroll bar से नीचे की लिखाई देखोगे। यही window के अलग-अलग भागों का उपयोग है।</div>
+<div class="remember"><b>याद रखो:</b> Minimize window को बंद नहीं करता; वह taskbar पर भेजता है। Close window बंद करता है।</div>`,quiz:[{q:"Desktop की background image क्या कहलाती है?",o:["Wallpaper","Toolbar","Status bar"],a:0},{q:"Window को taskbar पर भेजने वाला button?",o:["Minimize","Close","Scroll"],a:0},{q:"लंबे page में ऊपर-नीचे जाने के लिए?",o:["Scroll Bar","Title Bar","Caption"],a:0}]},
+{n:"Windows Accessories",hi:"Notepad, WordPad, Paint और Calculator",icon:"🧮",html:`
+<p>Accessories छोटे built-in programs होते हैं जो रोजमर्रा के basic कामों में मदद करते हैं। उपलब्धता Windows version के अनुसार बदल सकती है।</p>
+<table><tr><th>Program</th><th>उपयोग</th></tr><tr><td>Notepad</td><td>Plain text लिखना और .txt में save करना।</td></tr><tr><td>WordPad</td><td>Basic formatted document लिखना; पुराने Windows में उपलब्ध।</td></tr><tr><td>Paint</td><td>सरल drawing, shapes और image editing।</td></tr><tr><td>Calculator</td><td>जोड़, घटाव, गुणा, भाग आदि।</td></tr></table>
+<div class="ex"><b>🧑‍🎓 उदाहरण:</b> Practical में आज आपने सीखा हुआ topic लिखना है। पहले Notepad में plain notes बनाओ। किसी heading को bold और अलग आकार में रखना हो तो WordPad जैसे word processor का उपयोग कर सकते हो। Circuit या flow का छोटा sketch Paint में बनाओ और calculation Calculator से कर लो। चार अलग जरूरतों के लिए चार अलग tools हैं।</div>
+<div class="remember"><b>याद रखो:</b> Notepad plain text editor है; Paint drawing tool है; Calculator गणना करता है।</div>`,quiz:[{q:"Plain text लिखने के लिए कौन-सा program?",o:["Notepad","Paint","Calculator"],a:0},{q:"सरल drawing बनाने के लिए?",o:["Paint","Notepad","Taskbar"],a:0},{q:"गणना करने के लिए?",o:["Calculator","WordPad","BIOS"],a:0}]},
+{n:"Windows 7 की Aero सुविधाएँ",hi:"Snap, Shake, Peek और Superbar",icon:"✨",html:`
+<p>Windows 7 में desktop पर windows संभालने के लिए कुछ Aero सुविधाएँ दी गई थीं। ये पाठ्यक्रम के लिए उपयोगी ऐतिहासिक features हैं।</p>
+<ul><li><b>Aero Snap:</b> Window को screen के किनारे ले जाकर आधी screen में व्यवस्थित करना।</li><li><b>Aero Shake:</b> एक window को shake करने पर बाकी windows minimize करने का तरीका (कुछ editions/settings में)।</li><li><b>Aero Peek:</b> taskbar के Show Desktop/preview अनुभव से desktop या window preview देखना।</li><li><b>Superbar:</b> Windows 7 की बेहतर taskbar, जिसमें pinned apps और window previews शामिल थे।</li></ul>
+<div class="ex"><b>🧑‍💻 उदाहरण:</b> मान लो एक तरफ class notes और दूसरी तरफ calculator खोलकर comparison करना है। Snap से दोनों windows को screen के दो हिस्सों में जमाया जा सकता है। इससे बार-बार एक window बंद/खोलने की जरूरत कम होती है।</div>
+<div class="remember"><b>याद रखने की trick:</b> Snap = जमाना, Shake = बाकी windows समेटना, Peek = झलक देखना, Superbar = उन्नत taskbar।</div>`,quiz:[{q:"दो windows को screen के किनारों पर व्यवस्थित करने वाली सुविधा?",o:["Aero Snap","Aero Shake","Aero Peek"],a:0},{q:"Aero Peek का संबंध किससे है?",o:["Desktop/window की झलक","File format","BIOS password"],a:0},{q:"Windows 7 की improved taskbar को क्या कहा गया?",o:["Superbar","Spooler","Control Panel"],a:0}]},
+{n:"File और Folder के जरूरी Operations",hi:"Create, Save, Rename, Copy, Move और Delete",icon:"📁",html:`
+<p><b>File</b> में data होता है, जैसे photo, document या song। <b>Folder</b> files और दूसरे folders को व्यवस्थित रखने का container है।</p>
+<table><tr><th>Operation</th><th>मतलब</th></tr><tr><td>Create</td><td>नई file/folder बनाना।</td></tr><tr><td>Save</td><td>काम को नाम और location देकर सुरक्षित करना।</td></tr><tr><td>Rename</td><td>नाम बदलना; सामान्यतः F2 shortcut।</td></tr><tr><td>Copy + Paste</td><td>दूसरी जगह duplicate बनाना; original वहीं रहता है।</td></tr><tr><td>Cut + Paste</td><td>एक जगह से दूसरी जगह ले जाना।</td></tr><tr><td>Delete</td><td>हटाना; कई सामान्य स्थितियों में Recycle Bin में जाता है।</td></tr></table>
+<div class="ex"><b>🗂️ मजेदार उदाहरण:</b> अपने COPA notes के लिए “Chapter 4” नाम का folder बनाओ। उसके अंदर “BIOS.txt” और “Windows.txt” रखो। BIOS.txt की दूसरी copy दोस्त को देने के लिए Copy-Paste करो—तुम्हारी original file भी रहेगी। यदि file को ही दूसरे folder में shift करना है तो Cut-Paste करो। नाम गलत है तो F2 से Rename कर दो।</div>
+<div class="remember"><b>सावधानी:</b> Delete करने से पहले सही file चुनो। Shift+Delete सामान्यतः Recycle Bin bypass कर सकता है; इसका अभ्यास जरूरी files पर न करें।</div>`,quiz:[{q:"Original file को रखते हुए duplicate बनाने के लिए?",o:["Copy","Cut","Delete"],a:0},{q:"File rename करने की सामान्य shortcut key?",o:["F2","F5","F12"],a:0},{q:"एक जगह से दूसरी जगह file ले जाने के लिए?",o:["Cut और Paste","Copy only","Refresh"],a:0}]},
+{n:"Windows Install और Format — केवल जानकारी",hi:"Setup का क्रम और data सुरक्षा",icon:"💿",html:`
+<div class="def"><b>महत्वपूर्ण सुरक्षा:</b> Formatting या partition बदलने से drive का data मिट सकता है। इसे अपने या किसी और के असली computer पर बिना अनुमति, backup और प्रशिक्षक की निगरानी के कभी न करें। Windows XP पुराना और unsupported है—इसे आज के computer पर install करना सुरक्षित सामान्य सलाह नहीं है।</div>
+<p>पाठ्यक्रम में पुराने Windows setup का सामान्य क्रम समझाया जा सकता है: bootable media से setup शुरू होना, hardware जाँच, license/region/time जैसी जानकारी, storage/partition चयन, file copy और restart। XP जैसे पुराने setup में partition और NTFS formatting के विकल्प भी दिखते थे।</p>
+<h3>Conceptual sequence</h3><ol><li>पहले जरूरी files का backup और अनुमति की पुष्टि।</li><li>किस OS और hardware की जरूरत है, यह जाँचना।</li><li>Boot media से setup environment शुरू होना।</li><li>Storage/partition की पहचान—गलत चयन data मिटा सकता है।</li><li>Setup द्वारा system files copy करना और configuration पूरा करना।</li><li>Updates, drivers और security settings की जाँच।</li></ol>
+<div class="ex"><b>🧑‍🏫 उदाहरण:</b> इसे घर बदलने जैसा समझो। सामान पैक किए बिना पुराना घर खाली कर दोगे तो जरूरी चीजें खो सकती हैं। उसी तरह backup और सही drive की पहचान किए बिना format करने से notes, photos और documents मिट सकते हैं। इसलिए इस topic को पहले diagram/virtual machine में समझो, real drive पर प्रयोग नहीं।</div>
+<div class="remember"><b>याद रखो:</b> Format = storage को filesystem के लिए तैयार करना; यह data loss का कारण बन सकता है। XP installation को केवल historical syllabus knowledge की तरह पढ़ें।</div>`,quiz:[{q:"Format करने से पहले सबसे जरूरी कदम?",o:["Backup और सही drive की पुष्टि","Wallpaper बदलना","Sound बढ़ाना"],a:0},{q:"Windows XP आज क्यों सावधानी से पढ़ना चाहिए?",o:["यह unsupported पुराना OS है","यह नया OS है","यह antivirus है"],a:0},{q:"गलत partition चुनने का खतरा क्या है?",o:["Data मिट सकता है","Monitor तेज हो जाएगा","Keyboard बदल जाएगा"],a:0}]},
+{n:"महत्वपूर्ण Keyboard Shortcuts",hi:"तेजी से काम करने की keys",icon:"⌨️",html:`
+<table><tr><th>Shortcut</th><th>काम</th></tr><tr><td>Ctrl + C</td><td>Copy</td></tr><tr><td>Ctrl + X</td><td>Cut</td></tr><tr><td>Ctrl + V</td><td>Paste</td></tr><tr><td>Ctrl + Z</td><td>Undo — पिछला काम वापस</td></tr><tr><td>Ctrl + A</td><td>Select All</td></tr><tr><td>Alt + Tab</td><td>खुली windows के बीच switch</td></tr><tr><td>Alt + F4</td><td>Active window बंद</td></tr><tr><td>Windows + D</td><td>Desktop दिखाना/वापस लाना</td></tr><tr><td>Windows + E</td><td>File Explorer खोलना</td></tr><tr><td>F2</td><td>Selected file/folder rename</td></tr></table>
+<div class="ex"><b>🏁 उदाहरण:</b> तुमने Notepad में notes लिखे। पूरा text चुनने के लिए Ctrl+A, copy के लिए Ctrl+C और दूसरे document में paste के लिए Ctrl+V। गलती हो गई तो Ctrl+Z। दो apps के बीच जाना हो तो Alt+Tab। इस तरह mouse से बार-बार menu खोलने की जरूरत कम होती है।</div>
+<div class="remember"><b>Practice:</b> पहले खाली Notepad में इन shortcuts का अभ्यास करो। कुछ shortcuts का व्यवहार app और Windows version के अनुसार थोड़ा बदल सकता है।</div>`,quiz:[{q:"Copy की shortcut key?",o:["Ctrl+C","Ctrl+X","Ctrl+V"],a:0},{q:"खुली windows के बीच switch?",o:["Alt+Tab","Ctrl+A","F2"],a:0},{q:"File Explorer खोलने की shortcut?",o:["Windows+E","Windows+D","Alt+F4"],a:0}]},
+{n:"Chapter 4 — Final Combined Test",hi:"पूरे अध्याय की एक साथ परीक्षा",icon:"🏆",html:`
+<div class="def"><b>अब अपनी तैयारी जाँचो!</b> नीचे दिए गए प्रश्न Chapter 4 के सभी मुख्य topics से लिए गए हैं। पहले notes पढ़ो, फिर बिना मदद के उत्तर चुनो। हर प्रश्न का उत्तर चुनने पर तुरंत feedback मिलेगा।</div>
+<p>इस final test में OS के कार्य/प्रकार, BIOS-POST, Windows versions, desktop, accessories, Aero, file operations, installation safety और shortcuts शामिल हैं।</p>
+<div class="remember"><b>छोटा नियम:</b> पहले खुद सोचो, फिर option चुनो। गलत उत्तर आए तो संबंधित topic दोबारा पढ़ो।</div>`,quiz:[]}
+
 ];
+// Chapter 4 के अतिरिक्त syllabus विवरण नीचे जोड़े गए हैं।
+// OS के Device Management के syllabus points: transfer unit, representation, sharing, buffering और spooling
+CH4_TOPICS[0].html += `<h3>Device Management — विस्तार से</h3>
+<p>OS input/output devices जैसे keyboard, mouse, monitor, printer और storage devices के साथ communication नियंत्रित करता है। Device की <b>speed</b> अलग हो सकती है—CPU तेज़ और printer अपेक्षाकृत धीमा; OS इनके बीच तालमेल रखता है। <b>Unit of Transfer</b> बताती है कि data किस इकाई/आकार में भेजा या लिया जाता है, जैसे character, byte या block। <b>Data Representation</b> का अर्थ device के अनुसार data को उपयुक्त रूप में प्रस्तुत/समझना है। <b>Device Sharing</b> में कई programs/users एक device को नियम से उपयोग कर सकते हैं।</p>
+<p><b>Buffering:</b> अस्थायी memory buffer में data रखकर तेज़ और धीमे उपकरणों की गति का अंतर संभालना। <b>Spooling:</b> किसी काम—जैसे print job—को disk/queue में क्रम से रखना, ताकि printer खाली होते ही अगला काम करे। Buffering data के अस्थायी ठहराव पर जोर देता है; spooling jobs की queue पर।</p>
+<div class="ex"><b>कहानी:</b> लैब में दस विद्यार्थियों ने एक printer को print command दी। OS ने jobs को queue में लगाया—यह spooling है। Printer धीरे-धीरे पन्ने छापता रहा और data का छोटा हिस्सा buffer में उपलब्ध रहा—यह buffering है। इस तरह सबके काम क्रम से ہوئے और printer पर एक साथ दबाव नहीं पड़ा।</div>`;
+CH4_TOPICS[0].html += `<h3>Memory और Storage Management</h3><p><b>Memory Management</b> RAM में चल रहे programs को जगह देना, खाली जगह का हिसाब रखना और जरूरत पर memory मुक्त करना है। <b>Storage Management</b> HDD/SSD/pen drive जैसे स्थायी storage में जगह, partitions, free space और data organization का प्रबंधन है। RAM अस्थायी working space है; storage में files बिजली बंद होने के बाद भी बनी रहती हैं।</p><div class="ex"><b>कहानी:</b> राहुल की मेज RAM जैसी है—जिस किताब पर अभी काम हो रहा है वह मेज पर खुली है। अलमारी storage जैसी है—बाकी किताबें वहाँ सुरक्षित रखी हैं। मेज की जगह कम हो तो कुछ किताबें वापस अलमारी में रखनी पड़ती हैं।</div>`;
+CH4_TOPICS[1].html += `<h3>OS के प्रमुख प्रकार — पूरा अंतर</h3><table><tr><th>प्रकार</th><th>कैसे काम करता है</th><th>उदाहरण/उपयोग</th></tr><tr><td>Batch OS</td><td>एक जैसे jobs को समूह में लेकर क्रम से चलाता है; user का लगातार interaction कम होता है।</td><td>पुराने payroll/billing batch काम</td></tr><tr><td>Time-Sharing OS</td><td>CPU का छोटा time-slice users/processes में बाँटता है, जिससे सबको response मिलता है।</td><td>Multi-user computer systems</td></tr><tr><td>Distributed OS</td><td>कई जुड़े computers के resources को समन्वय से उपयोग करता है।</td><td>Distributed computing environment</td></tr><tr><td>Network OS</td><td>नेटवर्क पर users, files, printers और permissions manage करता है।</td><td>Windows Server, कुछ Linux server setups</td></tr><tr><td>Real-Time OS</td><td>निर्धारित समय सीमा में response देना आवश्यक होता है।</td><td>औद्योगिक control और embedded systems</td></tr></table>`;
+CH4_TOPICS[2].html += `<h3>Windows का इतिहास — syllabus timeline</h3><p>मुख्य पड़ाव: <b>Windows NT (1993), Windows 95 (1995), Windows 98 (1998), Windows 2000 (2000), Windows ME (2000), Windows XP (2001), Windows Vista (2007), Windows 7 (2009), Windows 8 (2012), Windows 8.1 (2013), Windows 10 (2015), Windows 11 (2021)</b>। अलग editions की release dates/availability क्षेत्र के अनुसार भिन्न हो सकती हैं। NT family ने आधुनिक Windows की तकनीकी नींव में महत्वपूर्ण भूमिका निभाई।</p><div class="remember"><b>ध्यान दें:</b> Windows XP और Windows 7 सहित पुराने versions अब सामान्य सुरक्षा समर्थन से बाहर हैं। इन्हें syllabus/history के रूप में समझें, internet-connected daily use के लिए नहीं।</div>`;
+CH4_TOPICS[2].html += `<h3>BIOS/UEFI और POST का परिचय</h3><p>BIOS (Basic Input/Output System) पुराने PCs में firmware है जो startup पर hardware को initialize करके boot process शुरू करने में मदद करता है। आधुनिक PCs में अक्सर UEFI firmware होता है। <b>POST (Power-On Self-Test)</b> startup पर basic hardware checks करता है। Firmware setup में date/time, boot order और कुछ systems में fan/voltage monitoring जैसी settings हो सकती हैं; विकल्प motherboard के अनुसार बदलते हैं। BIOS password सुरक्षा की एक परत है, लेकिन अकेला पूर्ण data protection नहीं।</p><div class="ex"><b>कहानी:</b> स्कूल खुलने से पहले चौकीदार दरवाज़े, बिजली और कमरों की शुरुआती जाँच करता है। POST भी startup पर hardware की शुरुआती जाँच जैसा है। सब ठीक होने पर boot process आगे बढ़ता है और OS load होता है।</div>`;
+CH4_TOPICS[3].html += `<h3>Windows XP Desktop और Window के भाग (ऐतिहासिक syllabus)</h3><p>Windows XP desktop पर wallpaper, Start button, taskbar और icons प्रमुख भाग थे। किसी खुली window में <b>Title Bar</b> शीर्षक दिखाती है; <b>Caption Buttons</b> (Minimize, Maximize/Restore, Close) window नियंत्रित करते हैं; <b>Menu Bar</b> commands के menu दिखाती है; <b>Toolbar</b> आम commands के buttons देती है; <b>Scroll Bar</b> ऊपर-नीचे/दाएँ-बाएँ जाने देती है; <b>Status Bar</b> नीचे अतिरिक्त स्थिति/जानकारी दिखाती है। हर program में ये सभी भाग होना जरूरी नहीं।</p><div class="ex"><b>कहानी:</b> राहुल ने Notepad खोला। ऊपर Title Bar में document का नाम दिखा, कोने के buttons से window छोटी/बड़ी/बंद हुई और लंबा text होने पर scroll किया। उसने window को एक छोटी working desk की तरह समझा।</div>`;
+CH4_TOPICS[2].html += `<h3>BIOS setup में सामान्य विकल्प</h3><ul><li><b>Boot Order:</b> किस device से startup खोज शुरू होगी—जैसे internal drive या approved boot media।</li><li><b>Date/Time:</b> system clock की तारीख और समय।</li><li><b>BIOS Password:</b> firmware settings/startup पर access रोकने की सुविधा, यदि hardware support करे।</li><li><b>Fan/Voltage:</b> कुछ boards पर monitoring या सीमित control; गलत बदलाव से overheating/instability हो सकती है।</li><li><b>Save & Exit:</b> किए गए बदलाव लागू करके बाहर निकलना; बिना समझे settings न बदलें।</li></ul><div class="remember"><b>सुरक्षा:</b> BIOS/UEFI में अनजान settings न बदलें। Fan/voltage tuning और boot settings प्रशिक्षक की निगरानी में ही सीखें।</div>`;
+// हर learning topic के quiz में कम-से-कम तीन सवाल; पहले से मौजूद सवाल सुरक्षित रखकर उपयुक्त अतिरिक्त प्रश्न जोड़ें
+const CH4_EXTRA_QUIZ = {
+"ऑपरेटिंग सिस्टम (OS) क्या है?": [
+{q:"RAM में programs को जगह देने वाला OS function?",o:["Memory Management","File Management","Printing"],a:0},
+{q:"Printer jobs को queue में क्रम से रखने की तकनीक?",o:["Spooling","Formatting","Defragmentation"],a:0}],
+"OS के प्रकार (GUI और CLI)": [
+{q:"कई jobs को समूह में process करने वाला OS?",o:["Batch OS","Real-Time OS","Mobile OS"],a:0},
+{q:"समय-सीमा में response देना किस OS की खासियत है?",o:["Real-Time OS","Batch OS","Single-user OS"],a:0}],
+"Windows का परिचय": [
+{q:"Windows XP किस वर्ष जारी हुआ था?",o:["2001","1995","2015"],a:0},
+{q:"आधुनिक PCs में BIOS के स्थान पर आमतौर पर कौन-सा firmware मिलता है?",o:["UEFI","GUI","POST"],a:0}],
+"Desktop और Taskbar": [
+{q:"खुली window का नाम सामान्यतः कहाँ दिखता है?",o:["Title Bar","Recycle Bin","Wallpaper"],a:0},
+{q:"Minimize button का काम क्या है?",o:["Window को taskbar पर छोटा करना","Computer बंद करना","File delete करना"],a:0}],
+"File और Folder": [
+{q:"किस extension से सामान्यतः PDF document पहचाना जाता है?",o:[".pdf",".mp3",".exe"],a:0},
+{q:"File का पूरा पता क्या कहलाता है?",o:["Path","Wallpaper","Buffer"],a:0}],
+"File Explorer और फाइल Operations": [
+{q:"Save का अर्थ क्या है?",o:["काम को storage में सुरक्षित करना","फाइल को print करना","Monitor बंद करना"],a:0},
+{q:"Recycle Bin का मुख्य उपयोग?",o:["हटाई गई files को अस्थायी रूप से रखना","RAM बढ़ाना","Program install करना"],a:0}],
+"Control Panel और Settings": [
+{q:"भाषा और keyboard layout कहाँ बदले जाते हैं?",o:["Region and Language","Sound","Display"],a:0},
+{q:"Printer जोड़ने/देखने के लिए कौन-सा section उपयोगी है?",o:["Devices and Printers","Wallpaper","Recycle Bin"],a:0}],
+"Windows Accessories और Utility": [
+{q:"Text को formatting के साथ लिखने वाला पारंपरिक Windows accessory?",o:["WordPad","Paint","Calculator"],a:0},
+{q:"कौन-सा tool drawing के लिए है?",o:["Paint","Notepad","Task Manager"],a:0}],
+"Windows 7 की Aero सुविधाएँ": [
+{q:"Aero Shake का उद्देश्य क्या था?",o:["एक window shake करके बाकी minimize करना","File compress करना","BIOS खोलना"],a:0}],
+"File और Folder के जरूरी Operations": [
+{q:"नई folder बनाने की सामान्य shortcut?",o:["Ctrl+Shift+N","Alt+F4","Ctrl+Z"],a:0}],
+"Windows Install और Format — केवल जानकारी": [
+{q:"Partition बदलने/format करने में मुख्य जोखिम?",o:["Data loss","Wallpaper loss only","Sound बंद होना"],a:0}],
+"महत्वपूर्ण Keyboard Shortcuts": [
+{q:"Undo की shortcut क्या है?",o:["Ctrl+Z","Ctrl+Y only","Alt+Tab"],a:0}]
+};
+CH4_TOPICS.forEach(topic => {
+ const extras = CH4_EXTRA_QUIZ[topic.n] || [];
+ if (extras.length) topic.quiz = (topic.quiz || []).concat(extras);
+});
+
+// Final combined test: collect questions from every Chapter 4 learning topic.
+CH4_TOPICS[CH4_TOPICS.length-1].quiz = CH4_TOPICS.slice(0,-1).flatMap((topic, index) =>
+ (topic.quiz || []).map((question) => ({...question, q:`[${topic.n}] ${question.q}`}))
+);
+
+
+// Chapter 4 quality pass: story-based learning, quiz completion and a real combined test.
+const CH4_STORY_BANK = {
+"ऑपरेटिंग सिस्टम (OS) क्या है?":"एक दिन ITI लैब में दस विद्यार्थी एक ही printer पर practical की file निकालना चाहते थे। कोई print command देता, कोई keyboard से काम करता और कोई अपनी file save कर रहा था। अगर हर विद्यार्थी सीधे hardware को अपने हिसाब से चलाने लगे तो गड़बड़ हो जाए। Operating System ने सभी requests को व्यवस्थित किया, memory बाँटी, files संभालीं और printer को सही क्रम में काम कराया। इस कहानी से समझो कि OS computer का manager है—यह user और hardware के बीच तालमेल बनाता है।",
+"OS के प्रकार (GUI और CLI)":"लैब में दो विद्यार्थी एक ही काम कर रहे थे—folder बनाना। पहला विद्यार्थी mouse से icon पर click करके folder बनाता है; यह GUI यानी Graphical User Interface है। दूसरा विद्यार्थी command लिखकर folder बनाता है; यह CLI/CUI यानी command-line interface का तरीका है। दोनों का लक्ष्य एक है, बस computer से बात करने का तरीका अलग है। GUI में icons, menus और pointer मदद करते हैं; CLI में सही command और spelling जरूरी होती है।",
+"Windows का परिचय":"कल्पना करो कि computer एक खाली कमरा है। Windows उस कमरे को उपयोगी बनाता है—काम करने की जगह, दरवाजे, अलमारी और सामान तक पहुँचने का तरीका देता है। Desktop पर shortcuts, taskbar पर खुले programs और File Explorer में documents मिलते हैं। Windows एक operating system है; यह applications चलाने और hardware resources manage करने में मदद करता है।",
+"Desktop और Taskbar":"क्लास शुरू होने से पहले विद्यार्थी अपनी मेज पर किताबें रखते हैं और जरूरी सामान पास रखते हैं। Windows Desktop भी ऐसा ही काम करने का स्थान है—wallpaper पृष्ठभूमि है, icons जरूरी files/apps के shortcuts हैं और Taskbar में Start button, pinned apps तथा खुले हुए programs दिखते हैं। किसी खुले program पर taskbar में click करके वापस जा सकते हो।",
+"File और Folder":"मान लो तुम्हारे पास COPA के 50 notes हैं। अगर सभी कागज बैग में बिना क्रम के डाल दोगे तो BIOS वाला note ढूँढने में समय लगेगा। इसलिए तुम एक मुख्य folder ‘COPA’ बनाते हो और उसके अंदर ‘Chapter 4’, ‘Practical’ और ‘Revision’ folders रखते हो। अलग-अलग documents files हैं और folders उन्हें व्यवस्थित रखने के container हैं। नाम और स्थान सोच-समझकर रखने से काम जल्दी मिलता है।",
+"File Explorer और फाइल Operations":"तुम्हें शिक्षक को तीन files जमा करनी हैं। File Explorer खोलकर तुम सही folder तक जाते हो, file का नाम देखते हो, जरूरत हो तो copy बनाते हो और फिर सही स्थान पर paste करते हो। Copy करने पर original बची रहती है; Cut-Paste से file दूसरी जगह move होती है। Search box से नाम खोज सकते हो और address bar से folder का रास्ता समझ सकते हो।",
+"Control Panel और Settings":"कंप्यूटर की lab में एक विद्यार्थी को display brightness, Wi-Fi और printer की setting बदलनी है। Windows Settings रोजमर्रा की कई settings का आधुनिक केंद्र है, जबकि Control Panel में कई पारंपरिक configuration विकल्प मिलते हैं। दोनों का काम system को अपनी जरूरत के अनुसार configure करने में मदद करना है। बिना समझे advanced setting न बदलो; पहले विकल्प का काम पढ़ो।",
+"Windows Accessories और Utility":"प्रैक्टिकल के बाद विद्यार्थी को छोटा note लिखना है, diagram बनाना है और calculation करनी है। वह text के लिए Notepad, drawing के लिए Paint और गणना के लिए Calculator खोलता है। Utility tools system की देखभाल या सहायक काम करते हैं; हर accessory और utility एक ही चीज नहीं होती। सही काम के लिए सही tool चुनना सीखो।",
+"Program Install और Uninstall":"तुम्हें typing practice का program चाहिए। पहले teacher से अनुमति लेते हो, source भरोसेमंद है या नहीं देखते हो, फिर setup की instructions पढ़कर install करते हो। अब program की जरूरत नहीं रही तो Settings/Control Panel के Apps विकल्प से uninstall करते हो। अनजान websites से software डाउनलोड करना या बिना अनुमति install करना सही तरीका नहीं है।",
+"Keyboard Shortcuts और आम Problems":"कक्षा में समय कम है और तुम्हें text copy करके दूसरे document में डालना है। Ctrl+A से text select, Ctrl+C से copy और Ctrl+V से paste करते हो। गलती पर Ctrl+Z मदद करता है और Alt+Tab से खुले programs बदलते हो। अगर computer धीमा हो तो पहले खुले programs, storage space और restart जैसी सामान्य बातें जाँचो; बिना कारण system files delete मत करो।",
+"Chapter 4 — Revision Summary":"परीक्षा से एक दिन पहले विद्यार्थी पूरे chapter को कहानी की तरह दोहराता है: OS manager है, GUI/CLI बातचीत के तरीके हैं, BIOS/POST startup की जाँच से जुड़े हैं, Windows desktop काम की जगह है और folders files को क्रम में रखते हैं। वह हर शब्द का एक उदाहरण बनाता है और फिर quiz हल करता है। इस तरह definitions रटने के बजाय concepts आपस में जुड़ जाते हैं।",
+"OS के मुख्य कार्य — Device, Process, Memory और File Management":"एक ही समय पर lab computer में browser, music player और document खुले हैं। OS CPU time बाँटकर processes चलाता है, RAM का उपयोग manage करता है, printer/keyboard जैसे devices के साथ drivers के जरिए काम करता है और files/folders का record रखता है। Printer को भेजे गए काम queue में लग सकते हैं—इसे spooling समझने का एक उदाहरण मानो; buffering में data अस्थायी memory में रखा जाता है ताकि दो हिस्सों की गति का अंतर संभले।",
+"Operating System के प्रकार":"एक स्कूल में अलग-अलग कामों के लिए अलग व्यवस्था सोचो। Batch system कई jobs को समूह में चलाता है; time-sharing कई users/processes को बारी-बारी CPU time देता है; network OS नेटवर्क पर resources साझा कराने में मदद करता है; distributed system कई computers को मिलकर काम करने देता है; real-time OS निश्चित समय-सीमा में response देने के लिए बनाया जाता है। हर प्रकार का चुनाव काम की जरूरत पर निर्भर है।",
+"BIOS और POST":"Computer चालू करते ही screen पर manufacturer का logo आता है और system शुरुआती hardware checks करता है। इसे POST कहते हैं—Power-On Self-Test। BIOS/UEFI firmware startup में hardware initialize करने और boot device खोजने में मदद करता है। Setup में date/time और boot order जैसी settings हो सकती हैं; विकल्प motherboard के अनुसार बदलते हैं। Fan speed और voltage जैसी settings केवल समर्थित hardware पर होती हैं और गलत बदलाव से system अस्थिर हो सकता है।",
+"Windows का इतिहास और संस्करण":"एक विद्यार्थी पुराने computer lab की timeline देखता है: Windows 95 और 98 ने home desktop computing को लोकप्रिय बनाया; Windows 2000 और ME अलग जरूरतों के लिए आए; XP लंबे समय तक प्रसिद्ध रहा; Vista, 7, 8 और 10 ने interface तथा features बदले। Windows 11 भी बाद का version है। पुराने versions को इतिहास और syllabus के लिए पढ़ो—unsupported Windows को internet से जुड़े मुख्य computer पर चलाना सुरक्षित विकल्प नहीं है।",
+"Windows XP Desktop और Window के भाग":"पुराने XP computer पर विद्यार्थी एक window खोलता है। सबसे ऊपर Title Bar में program/document का नाम है; Caption buttons से minimize, maximize/restore और close कर सकते हैं। Menu bar में commands, toolbar में common actions, scroll bar से ऊपर-नीचे जाना और status bar में document की स्थिति दिख सकती है। हर program में इनका रूप थोड़ा अलग हो सकता है।",
+"Windows Accessories":"एक ही practical में विद्यार्थी Notepad में plain text लिखता है, WordPad में formatted text (पुराने Windows संस्करणों में), Paint में diagram बनाता है और Calculator से जोड़-घटाव करता है। वह समझता है कि अलग-अलग applications अलग जरूरतों के लिए बनी हैं। Windows versions के अनुसार कुछ पुराने accessories उपलब्ध न भी हों।",
+"Windows 7 की Aero सुविधाएँ":"विद्यार्थी Windows 7 में दो windows साथ देखना चाहता है। Aero Snap से window को screen के किनारे लगाकर व्यवस्थित करता है; Aero Peek से desktop/window की झलक देखता है; Aero Shake से एक window को हिलाकर दूसरी windows minimize करने का feature समझता है; Superbar taskbar का उन्नत रूप था। ये Windows 7 के ऐतिहासिक features हैं।",
+"File और Folder के जरूरी Operations":"विद्यार्थी ‘COPA’ folder में ‘Notes’ और ‘Photos’ folders बनाता है। गलती से file का नाम गलत लिखे तो Rename करता है; दूसरी जगह duplicate चाहिए तो Copy-Paste; file को स्थानांतरित करना हो तो Cut-Paste; काम सुरक्षित रखना हो तो Save। Delete से पहले file का नाम और स्थान जाँचता है, क्योंकि कुछ delete actions वापस पाना कठिन बना सकते हैं।",
+"Windows Install और Format — केवल जानकारी":"कंप्यूटर बदलने से पहले विद्यार्थी अपने notes का backup बनाता है और शिक्षक से अनुमति लेता है। वह समझता है कि OS installation में boot media, hardware compatibility, storage selection और configuration जैसे चरण होते हैं। Partition या format गलत चुनने से data मिट सकता है, इसलिए यह केवल supervised lab या virtual machine में सीखने का विषय है; किसी वास्तविक drive पर बिना विशेषज्ञ की निगरानी प्रयोग नहीं करना चाहिए।",
+"महत्वपूर्ण Keyboard Shortcuts":"Typing practice में विद्यार्थी shortcuts को छोटे खेल की तरह याद करता है: Ctrl+C copy, Ctrl+X cut, Ctrl+V paste, Ctrl+Z undo, Ctrl+A select all, Alt+Tab app बदलना, Alt+F4 active window बंद करना, Win+D desktop दिखाना, Win+E File Explorer खोलना और F2 rename। वह पहले खाली practice document में इन्हें आजमाता है।"
+};
+CH4_TOPICS.forEach((topic) => {
+  const story = CH4_STORY_BANK[topic.n];
+  if (story && !topic.html.includes('📖 कहानी से समझें')) {
+    topic.html += `<div class="ex" style="margin-top:16px"><b>📖 कहानी से समझें:</b><br>${story}</div>`;
+  }
+});
+
+// Ensure every teaching/revision topic has at least three questions. Existing questions are retained.
+const CH4_EXTRA_QUIZZES = {
+"ऑपरेटिंग सिस्टम (OS) क्या है?": [
+{q:"Operating System किसके बीच interface का काम करता है?",o:["User और hardware","Monitor और table","Printer और paper only"],a:0},
+{q:"RAM में programs को जगह देना किसका काम है?",o:["Memory Management","Wallpaper","Paint"],a:0}],
+"OS के प्रकार (GUI और CLI)": [
+{q:"Icons और menus वाला interface कौन-सा है?",o:["GUI","CLI","BIOS"],a:0},
+{q:"Command लिखकर काम करना किससे जुड़ा है?",o:["CLI","GUI only","Aero Peek"],a:0}],
+"Windows का परिचय": [
+{q:"Windows किस प्रकार का software है?",o:["Operating System"," केवल hardware","Printer cable"],a:0},
+{q:"Applications चलाने और resources manage करने में कौन मदद करता है?",o:["Windows OS","Wallpaper","Mouse pad"],a:0}],
+"Desktop और Taskbar": [
+{q:"खुले हुए programs कहाँ दिख सकते हैं?",o:["Taskbar","Recycle Bin only","BIOS chip"],a:0},
+{q:"Desktop पर app/file खोलने के लिए सामान्यतः क्या दिखता है?",o:["Icon/shortcut","Voltage","Spool"],a:0}],
+"File और Folder": [
+{q:"Files को व्यवस्थित रखने का container क्या है?",o:["Folder","CPU","Taskbar"],a:0},
+{q:"किसमें वास्तविक document/data रखा जाता है?",o:["File","Wallpaper","Menu bar"],a:0}],
+"File Explorer और फाइल Operations": [
+{q:"Files और folders browse करने के लिए कौन-सा tool है?",o:["File Explorer","Calculator","POST"],a:0},
+{q:"Copy-Paste करने पर सामान्यतः क्या होता है?",o:["Original के साथ duplicate बनता है","Original अनिवार्य रूप से मिटती है","Computer बंद होता है"],a:0}],
+"Control Panel और Settings": [
+{q:"Windows configuration के लिए कौन-से स्थान उपयोग होते हैं?",o:["Settings और Control Panel","Paint और Notepad","POST और RAM"],a:0},
+{q:"Advanced setting बदलने से पहले क्या करना चाहिए?",o:["उसका काम समझना","सभी विकल्प random बदलना","सिस्टम files मिटाना"],a:0}],
+"Windows Accessories और Utility": [
+{q:"Plain text के लिए कौन-सा tool उपयोगी है?",o:["Notepad","Paint","BIOS"],a:0},
+{q:"Utility software का उद्देश्य क्या हो सकता है?",o:["System maintenance/helping tasks","केवल typing","केवल gaming"],a:0}],
+"Program Install और Uninstall": [
+{q:"Software कहाँ से लेना बेहतर है?",o:["Official/trusted source","Unknown pop-up","Random link"],a:0},
+{q:"Program हटाने का सही तरीका क्या है?",o:["Apps/Settings से Uninstall","Folder random delete करना","Monitor unplug करना"],a:0}],
+"Keyboard Shortcuts और आम Problems": [
+{q:"पिछला action वापस लेने की shortcut?",o:["Ctrl+Z","Ctrl+V","Alt+F4"],a:0},
+{q:"दो खुले applications के बीच switch करने की shortcut?",o:["Alt+Tab","Ctrl+X","F2"],a:0}],
+"Chapter 4 — Revision Summary": [
+{q:"POST कब चलता है?",o:["Computer startup पर","File rename करते समय","Paint खोलते समय"],a:0},
+{q:"RAM और HDD/SSD में मुख्य अंतर क्या है?",o:["RAM अस्थायी working memory है; HDD/SSD स्थायी storage है","दोनों केवल input devices हैं","HDD/SSD केवल चालू रहने पर data रखते हैं"],a:0},
+{q:"किस operation से original file बची रहती है और दूसरी copy बनती है?",o:["Copy-Paste","Cut-Paste","Delete"],a:0}]
+};
+CH4_TOPICS.forEach((topic) => {
+  const extras = CH4_EXTRA_QUIZZES[topic.n] || [];
+  topic.quiz = topic.quiz || [];
+  extras.forEach(q => { if (topic.quiz.length < 3) topic.quiz.push(q); });
+});
+// Build the end-of-chapter test from the actual chapter questions, preserving topic labels.
+const ch4ExamTopic = CH4_TOPICS.find(t => t.n === "Chapter 4 — Final Combined Test");
+if (ch4ExamTopic) {
+  ch4ExamTopic.quiz = CH4_TOPICS.filter(t => t !== ch4ExamTopic && t.n !== "Chapter 4 — Revision Summary")
+    .flatMap(t => (t.quiz || []).map(q => ({...q, q: `[${t.n}] ${q.q}`})));
+  ch4ExamTopic.html += `<div class="remember"><b>परीक्षा टिप:</b> हर प्रश्न में पहले topic का नाम पढ़ो, फिर concept याद करके उत्तर चुनो। कुल प्रश्न: ${ch4ExamTopic.quiz.length} (chapter content के सभी teaching topics से)।</div>`;
+}
+
 const CH4_PARTS = function (start) {
+ // Entry points use the first topic of each logical section.
  return [[start,"🟦 Part 1 — Operating System की बुनियाद"],
- [start+2,"🟩 Part 2 — Windows Desktop और परिचय"],
+ [start+2,"🟩 Part 2 — Windows का परिचय और Desktop"],
  [start+4,"🟨 Part 3 — File और Folder Management"],
  [start+6,"🟪 Part 4 — Settings और Accessories"],
- [start+8,"🟥 Part 5 — Programs और Troubleshooting"],
- [start+10,"🎯 Revision — Chapter 4 Summary"]];
+ [start+8,"🟥 Part 5 — Programs, Aero और Shortcuts"],
+ [start+10,"🎯 Revision — Chapter 4 Summary"],
+ [start+21,"🏆 Final Combined Test"]];
 };
 const CH4_CFG = {name:"Chapter 4 — Operating System और Windows",hi:"ऑपरेटिंग सिस्टम और विंडोज़",icon:"🪟"};
 
-const ALL = CH1_TOPICS.concat(TOPICS, CH3_TOPICS, CH4_TOPICS);   // Ch1: 0-20, Ch2: 21-60, Ch3: 61-94, Ch4: 95-105
-const CHAPTERS=[
- {name:"Chapter 1 — Trade Introduction and Safety Precautions",hi:"ट्रेड परिचय और सुरक्षा सावधानियाँ",start:0,count:21,icon:"📘",
-  parts:[[0,"🟦 Part 1 — Trade Introduction"],[1,"🟩 Part 2 — Scope और Progression"],[3,"🟥 Part 3 — Safety Rules"],[5,"🟨 Part 4 — Safety Symbols और Fire"],[8,"🧯 Part 5 — Fire Classes और Extinguishers"],[10,"🏫 Part 6 — ITI और Training System"],[11,"🦺 Part 7 — PPE और First Aid"],[14,"🚨 Part 8 — Emergency और Ergonomics"],[16,"🧹 Part 9 — Housekeeping और Reporting"],[18,"♻️ Part 10 — Environment और Lab Behaviour"],[20,"🎯 Revision — Chapter Summary"]]},
- {name:"Chapter 2 — Introduction to Computer Components",hi:"कंप्यूटर घटकों का परिचय",start:21,count:40,icon:"💻",
-  parts:[[21,"🟦 Part 1 — Computer की नींव (Basics)"],[30,"🟩 Part 2 — Computer के उपयोग (Uses)"],[31,"🟨 Part 3 — Input Devices (इनपुट डिवाइस)"],[43,"🟧 Part 4 — Output Devices (आउटपुट डिवाइस)"],[50,"🟪 Part 5 — Computer Memory (मेमोरी)"],[58,"🟥 Part 6 — Motherboard और Microprocessor"],[60,"🎯 Revision — Chapter Summary"]]},
- {name:"Chapter 3 — Computer Software",hi:"कंप्यूटर सॉफ्टवेयर",start:61,count:34,icon:"📗",
-  parts:[[61,"🟦 Part 1 — Software और उसका Classification"],[91,"🟧 Part 2 — Hardware/Software Issues और Solution"],[92,"🔓 Part 3 — Open Source Software"],[93,"🔌 Part 4 — Booting"],[94,"🎯 Revision — Chapter 3 Summary"]]},
- {name:CH4_CFG.name,hi:CH4_CFG.hi,start:95,count:11,icon:CH4_CFG.icon,
-  parts:CH4_PARTS(95)}
+
+// ==================== CHAPTER 5 — DOS CLI AND LINUX ====================
+const CH5_TOPICS = [
+{n:"MS-DOS का परिचय और Structure of DOS",hi:"डॉस की बनावट",icon:"💾",html:`<div class="def"><b>MS-DOS (Microsoft Disk Operating System)</b> एक command-line आधारित operating system है। इसमें यूज़र keyboard से command लिखकर कंप्यूटर को निर्देश देता है।</div><p><b>उदाहरण:</b> कंप्यूटर को एक फैक्ट्री समझो और DOS को उसका मैनेजर। अलग-अलग प्रोग्राम मिलकर सिस्टम को चलाते हैं।</p><h3>DOS के मुख्य भाग</h3><ol><li><b>Boot Record</b> — सिस्टम शुरू करने की प्रक्रिया में मदद करता है।</li><li><b>IO.SYS</b> — DOS के input/output से जुड़े निम्न-स्तरीय कार्यों में मदद करता है।</li><li><b>MSDOS.SYS</b> — DOS का मुख्य system module/kernel भाग।</li><li><b>COMMAND.COM</b> — कमांड पढ़ने और चलाने वाला command interpreter।</li></ol><div class="remember">याद रखें: DOS में काम मुख्यतः text commands से होता है, GUI icons से नहीं।</div>`,quiz:[{q:"MS-DOS किस प्रकार का interface देता है?",o:["Command Line Interface","केवल Touch Interface","केवल Voice Interface"],a:0},{q:"DOS में commands को interpret कौन करता है?",o:["COMMAND.COM","CONFIG.SYS","AUTOEXEC.BAT"],a:0}]},
+{n:"Boot Record और Booting",hi:"कंप्यूटर शुरू होने की प्रक्रिया",icon:"🚀",html:`<div class="def"><b>Booting</b> कंप्यूटर चालू होने पर operating system को काम करने योग्य बनाने की प्रक्रिया है। Boot record/boot sector में startup से संबंधित boot code और जानकारी हो सकती है।</div><p><b>उदाहरण:</b> स्कूल की घंटी बजने पर दिन की गतिविधियाँ शुरू होती हैं; इसी तरह power on के बाद startup प्रक्रिया शुरू होती है।</p><p>Firmware/BIOS शुरुआती जाँच करता है और boot device से bootloader या system startup code चलाने की प्रक्रिया आगे बढ़ती है। फिर OS के जरूरी हिस्से memory में load होते हैं।</p><div class="remember">Booting के सामान्य प्रकार: Cold Boot (बंद कंप्यूटर को चालू करना) और Warm Boot (restart करना)।</div>`,quiz:[{q:"Booting का अर्थ क्या है?",o:["OS को शुरू करना","फाइल rename करना","स्क्रीन साफ करना"],a:0},{q:"कंप्यूटर को बंद अवस्था से चालू करना क्या कहलाता है?",o:["Cold Boot","Warm Boot","Formatting"],a:0}]},
+{n:"BIOS और POST",hi:"हार्डवेयर की शुरुआती जाँच",icon:"🧩",html:`<div class="def"><b>BIOS (Basic Input/Output System)</b> पारंपरिक PC firmware है, जो startup पर hardware initialization और boot प्रक्रिया शुरू करने में मदद करता है। आधुनिक कंप्यूटरों में UEFI firmware भी आम है।</div><p><b>POST</b> का पूरा नाम <b>Power-On Self-Test</b> है। यह startup के समय RAM, keyboard और अन्य जरूरी hardware की शुरुआती जाँच करता है।</p><p><b>उदाहरण:</b> यात्रा से पहले गाड़ी की basic checking करना।</p><div class="remember">BIOS/UEFI firmware है; इसे DOS operating system न समझें।</div>`,quiz:[{q:"POST का पूरा नाम क्या है?",o:["Power-On Self-Test","Program Operating System Tool","Power Output System Test"],a:0},{q:"BIOS/UEFI का एक मुख्य काम क्या है?",o:["Startup पर hardware initialize करना","दस्तावेज़ टाइप करना","वीडियो एडिट करना"],a:0}]},
+{n:"MSDOS.SYS और COMMAND.COM",hi:"DOS के मुख्य प्रोग्राम",icon:"⚙️",html:`<h3>MSDOS.SYS</h3><p>यह DOS का महत्वपूर्ण system module था। DOS के संस्करण के अनुसार इसकी भूमिका और संरचना बदल सकती थी। इसे DOS के core/kernel भाग से जोड़ा जाता है।</p><h3>COMMAND.COM</h3><p>यह <b>Command Interpreter</b> है। यूज़र द्वारा लिखी command को पढ़कर built-in command चलाता है या बाहरी program खोजता है।</p><p><b>उदाहरण:</b> आप <code>CLS</code> लिखते हैं, तो COMMAND.COM इसे पहचानकर स्क्रीन साफ करने का निर्देश चलाता है।</p>`,quiz:[{q:"COMMAND.COM किसका उदाहरण है?",o:["Command Interpreter","Device Driver","Text Editor"],a:0},{q:"DOS के core system module से कौन-सी file जुड़ी है?",o:["MSDOS.SYS","NOTES.TXT","PHOTO.JPG"],a:0}]},
+{n:"CONFIG.SYS और AUTOEXEC.BAT",hi:"DOS की startup settings",icon:"🛠️",html:`<h3>CONFIG.SYS</h3><p>यह text configuration file थी। इसमें DOS startup के समय लागू होने वाली settings और device-related निर्देश रखे जा सकते थे। उदाहरण: <code>FILES=30</code>।</p><h3>AUTOEXEC.BAT</h3><p>यह batch file startup पर अपने commands को क्रम से चलाती थी। इसमें PATH या अन्य शुरुआती commands रखे जा सकते थे।</p><p><b>उदाहरण:</b> रोज सुबह की तय routine की तरह startup पर commands अपने-आप चलना।</p>`,quiz:[{q:"FILES=30 जैसी setting किस file में लिखी जा सकती है?",o:["CONFIG.SYS","AUTOEXEC.BAT","COMMAND.COM"],a:0},{q:"Startup पर commands की सूची चलाने वाली file कौन-सी है?",o:["AUTOEXEC.BAT","README.TXT","MSDOS.SYS"],a:0}]},
+{n:"File Extensions",hi:"फाइल के प्रकार पहचानना",icon:"📄",html:`<div class="def">File extension फाइल नाम के अंत में dot के बाद आने वाला भाग है। यह फाइल के प्रकार या उपयोग का संकेत देता है।</div><table><tr><th>Extension</th><th>अर्थ</th></tr><tr><td>.EXE</td><td>Executable program</td></tr><tr><td>.COM</td><td>DOS executable command/program format</td></tr><tr><td>.BAT</td><td>Batch commands की file</td></tr><tr><td>.TXT</td><td>Plain text file</td></tr></table><p>उदाहरण: <code>notes.txt</code> में .txt extension है।</p>`,quiz:[{q:"Batch file का extension क्या है?",o:[".BAT",".TXT",".JPG"],a:0},{q:"Plain text file का सामान्य extension क्या है?",o:[".TXT",".EXE",".COM"],a:0}]},
+{n:"Internal और External Commands",hi:"DOS कमांड के प्रकार",icon:"⌨️",html:`<h3>Internal Commands</h3><p>ये COMMAND.COM के built-in commands होते हैं और command interpreter के साथ उपलब्ध रहते हैं।</p><h3>External Commands</h3><p>इनके लिए अलग program file की जरूरत होती है, जो disk पर उपलब्ध होती है।</p><table><tr><th>Internal</th><th>External के उदाहरण</th></tr><tr><td>DIR, CLS, COPY, TYPE, REN, DEL, MD, CD, RD</td><td>EDIT, FORMAT</td></tr></table><div class="remember">याद रखें: Internal = COMMAND.COM में built-in; External = अलग program file।</div>`,quiz:[{q:"DIR किस प्रकार की DOS command है?",o:["Internal","External","Linux-only"],a:0},{q:"EDIT सामान्यतः किस प्रकार की command है?",o:["External","Internal","BIOS"],a:0}]},
+{n:"Internal Commands — CLS, DIR, COPY, TYPE",hi:"स्क्रीन, सूची और फाइल कमांड",icon:"📋",html:`<table><tr><th>Command</th><th>काम</th><th>उदाहरण</th></tr><tr><td>CLS</td><td>स्क्रीन साफ करना</td><td><code>CLS</code></td></tr><tr><td>DIR</td><td>फाइल/फोल्डर सूची देखना</td><td><code>DIR</code></td></tr><tr><td>COPY</td><td>फाइल कॉपी करना</td><td><code>COPY A.TXT B.TXT</code></td></tr><tr><td>TYPE</td><td>टेक्स्ट फाइल की सामग्री दिखाना</td><td><code>TYPE A.TXT</code></td></tr></table><p>इन commands का अभ्यास केवल अपनी practice directory या सुरक्षित sample files पर करें।</p>`,quiz:[{q:"फाइलों की सूची देखने के लिए कौन-सी command है?",o:["DIR","CLS","TYPE"],a:0},{q:"स्क्रीन साफ करने के लिए कौन-सी command है?",o:["CLS","COPY","TYPE"],a:0}]},
+{n:"Internal Commands — REN, DEL, MD, CD, RD",hi:"नाम बदलना और डायरेक्टरी संभालना",icon:"🗂️",html:`<table><tr><th>Command</th><th>काम</th><th>उदाहरण</th></tr><tr><td>REN</td><td>फाइल का नाम बदलना</td><td><code>REN OLD.TXT NEW.TXT</code></td></tr><tr><td>DEL</td><td>फाइल हटाना</td><td><code>DEL TEST.TXT</code></td></tr><tr><td>MD</td><td>नई directory बनाना</td><td><code>MD MYFOLDER</code></td></tr><tr><td>CD</td><td>directory बदलना</td><td><code>CD MYFOLDER</code></td></tr><tr><td>RD</td><td>खाली directory हटाना</td><td><code>RD MYFOLDER</code></td></tr></table><div class="remember">सावधानी: DEL हटाई गई फाइल को वापस पाना कठिन बना सकता है। अभ्यास में केवल sample file इस्तेमाल करें।</div>`,quiz:[{q:"नई directory बनाने की command कौन-सी है?",o:["MD","RD","REN"],a:0},{q:"Directory बदलने के लिए क्या लिखते हैं?",o:["CD","DEL","TYPE"],a:0}]},
+{n:"DATE, TIME और VOL Commands",hi:"तारीख, समय और वॉल्यूम जानकारी",icon:"🕒",html:`<ul><li><b>DATE</b> — सिस्टम की तारीख दिखाने या DOS के अनुसार बदलने के लिए।</li><li><b>TIME</b> — सिस्टम का समय दिखाने या बदलने के लिए।</li><li><b>VOL</b> — वर्तमान drive का volume label और serial number दिखाने के लिए।</li></ul><p><b>उदाहरण:</b> <code>DATE</code>, <code>TIME</code>, <code>VOL C:</code></p>`,quiz:[{q:"ड्राइव का Volume Label देखने के लिए कौन-सी command है?",o:["VOL","TIME","REN"],a:0},{q:"सिस्टम समय देखने के लिए क्या उपयोग करेंगे?",o:["TIME","MD","COPY"],a:0}]},
+{n:"External Commands — EDIT और FORMAT",hi:"बाहरी कमांड का परिचय",icon:"🧰",html:`<p><b>EDIT</b> DOS का text editor था। इससे text file बनाई या संपादित की जा सकती थी। उदाहरण: <code>EDIT NOTES.TXT</code>।</p><p><b>FORMAT</b> किसी storage volume को filesystem के लिए तैयार करता है। Formatting से उस volume का मौजूदा डेटा मिट सकता है।</p><div class="remember">सुरक्षा: FORMAT command को असली drive पर अभ्यास के लिए न चलाएँ। गलत drive चुनने पर महत्वपूर्ण डेटा खो सकता है।</div>`,quiz:[{q:"DOS में text file edit करने के लिए कौन-सा command दिया गया है?",o:["EDIT","VOL","DIR"],a:0},{q:"FORMAT चलाने से क्या जोखिम है?",o:["मौजूदा डेटा मिट सकता है","RAM बढ़ जाती है","फाइल अपने-आप backup हो जाती है"],a:0}]},
+{n:"Linux का परिचय और विशेषताएँ",hi:"ओपन सोर्स ऑपरेटिंग सिस्टम",icon:"🐧",html:`<div class="def"><b>Linux</b> एक open-source operating system kernel है। आम तौर पर Linux-based operating systems को distributions (जैसे Ubuntu, Fedora) के रूप में इस्तेमाल किया जाता है।</div><h3>मुख्य विशेषताएँ</h3><ul><li><b>Open Source:</b> source code उपलब्ध; लाइसेंस की शर्तों के अनुसार देखना, बदलना और बाँटना संभव।</li><li><b>Multi-user:</b> कई user accounts काम कर सकते हैं।</li><li><b>Multitasking:</b> एक समय में कई processes चल सकती हैं।</li><li><b>Security:</b> permissions और user privileges से सुरक्षा; कोई OS पूरी तरह virus-proof नहीं होता।</li></ul>`,quiz:[{q:"Linux को सामान्यतः किस रूप में जाना जाता है?",o:["Open-source kernel/OS ecosystem","केवल word processor","केवल hardware"],a:0},{q:"Multitasking का अर्थ क्या है?",o:["कई tasks/processes संभालना","एक ही फाइल रखना","केवल एक user होना"],a:0}]},
+{n:"Linux Architecture",hi:"Hardware से Utilities तक की परतें",icon:"🏗️",html:`<div class="def"><b>सरल क्रम:</b> User → Utilities/Applications → Shell → Kernel → Hardware</div><ol><li><b>Hardware:</b> CPU, RAM, disk, keyboard आदि भौतिक भाग।</li><li><b>Kernel:</b> processes, memory, devices और system resources संभालता है।</li><li><b>Shell:</b> user commands को समझकर system services तक पहुँचाता है।</li><li><b>Utilities/Applications:</b> file tools, editors, browsers और अन्य programs।</li></ol><p><b>उदाहरण:</b> Shell दुभाषिए जैसा है, Kernel मुख्य प्रबंधक है और Hardware वास्तविक मशीन है।</p>`,quiz:[{q:"Linux में hardware और software resources को manage कौन करता है?",o:["Kernel","Shell prompt","Text editor"],a:0},{q:"User की command स्वीकार करने वाला interface कौन-सा है?",o:["Shell","RAM","Hard disk"],a:0}]},
+{n:"Linux Shells के प्रकार",hi:"Bourne, Bash, C और Korn Shell",icon:"🐚",html:`<ul><li><b>Bourne Shell (sh):</b> पारंपरिक Unix shell।</li><li><b>Bash:</b> Bourne Again Shell; बहुत प्रचलित shell।</li><li><b>C Shell (csh):</b> C-जैसे syntax की विशेषताएँ।</li><li><b>Korn Shell (ksh):</b> Bourne और C shell परंपराओं से जुड़ी सुविधाएँ।</li></ul><p>Shell command interpreter और scripting environment देता है। अलग-अलग distributions में default shell अलग हो सकता है।</p>`,quiz:[{q:"Bash का पूरा नाम क्या है?",o:["Bourne Again Shell","Basic Access System Hardware","Binary Application Shell"],a:0},{q:"C Shell का सामान्य संक्षिप्त नाम क्या है?",o:["csh","ksh","pwd"],a:0}]},
+{n:"Linux File System और Directories",hi:"Root से शुरू होने वाली डायरेक्टरी संरचना",icon:"🌳",html:`<p>Linux में directory structure एक tree की तरह होता है और सबसे ऊपर <b>root directory <code>/</code></b> होती है। Drives को Windows की तरह C:, D: नाम से नहीं दिखाया जाता; storage devices filesystem में mount होते हैं।</p><table><tr><th>Directory</th><th>उपयोग</th></tr><tr><td><code>/</code></td><td>Root of filesystem</td></tr><tr><td><code>/root</code></td><td>Root user का home directory</td></tr><tr><td><code>/home</code></td><td>सामान्य users के home folders</td></tr><tr><td><code>/bin</code></td><td>महत्वपूर्ण user commands; आधुनिक systems में अक्सर /usr/bin से जुड़ा</td></tr></table>`,quiz:[{q:"Linux filesystem की root directory कौन-सी है?",o:["/","/home","C:"],a:0},{q:"सामान्य users की home directories सामान्यतः कहाँ होती हैं?",o:["/home","/root","/bin"],a:0}]},
+{n:"Linux Installation से पहले तैयारी",hi:"Backup, Requirements और Bootable Media",icon:"💿",html:`<ol><li><b>Data Backup:</b> जरूरी files का backup किसी अलग सुरक्षित स्थान पर रखें।</li><li><b>System Requirements:</b> चुने गए Linux distribution की आधिकारिक RAM, storage और processor requirements देखें। आवश्यकता distribution और version के अनुसार बदलती है।</li><li><b>Bootable Media:</b> आधिकारिक ISO image डाउनलोड करके USB installer तैयार करें।</li><li><b>Power और network:</b> installation के दौरान स्थिर बिजली और जरूरी network उपलब्ध रखें।</li></ol><div class="remember">महत्वपूर्ण: partitioning/installation से पहले backup और सही disk की पहचान जरूरी है।</div>`,quiz:[{q:"Linux install करने से पहले सबसे जरूरी सुरक्षा कदम क्या है?",o:["Data Backup","सभी files delete करना","Password सार्वजनिक करना"],a:0},{q:"Bootable USB बनाने के लिए क्या चाहिए?",o:["Linux ISO image और USB tool","केवल music file","केवल text editor"],a:0}]},
+{n:"Hard Drive Partitioning — Root और Swap",hi:"डिस्क के हिस्से और Swap Space",icon:"💽",html:`<p><b>Partitioning</b> disk को अलग-अलग logical हिस्सों में बाँटना है। Linux installation में partition layout चुने गए setup पर निर्भर करता है।</p><ul><li><b>Root partition (<code>/</code>):</b> Linux system files और installed software का मुख्य filesystem। ext4 एक आम filesystem है।</li><li><b>Swap:</b> disk या swap file का स्थान, जिसे memory pressure में virtual memory के रूप में इस्तेमाल किया जा सकता है।</li><li><b>EFI System Partition:</b> UEFI systems में boot files के लिए FAT-based partition हो सकता है।</li></ul><div class="remember">Swap को “नकली RAM” कहना आसान उदाहरण है, लेकिन यह असली RAM जितना तेज नहीं होता।</div>`,quiz:[{q:"Linux की root mount point क्या है?",o:["/","/home","/bin"],a:0},{q:"Swap का उपयोग किसलिए होता है?",o:["Memory pressure में virtual memory सहायता","Monitor brightness","Printer ink"],a:0}]},
+{n:"Linux Installation और Booting",hi:"Installer, GRUB और Kernel",icon:"⚡",html:`<h3>Installation</h3><p>Bootable USB से computer start करें, installer में भाषा, keyboard, time zone, user account और disk setup चुनें। प्रक्रिया distribution के अनुसार बदल सकती है।</p><h3>Booting</h3><p>UEFI/firmware के बाद bootloader चलता है। कई Linux systems में <b>GRUB (GRand Unified Bootloader)</b> उपलब्ध होता है। यह उपलब्ध operating systems या kernels में से चयन करने देता है। इसके बाद Linux kernel memory में load होता है और system services शुरू होती हैं।</p>`,quiz:[{q:"GRUB का मुख्य काम क्या है?",o:["Bootloader के रूप में OS/kernel चुनने और शुरू करने में मदद","Text file edit करना","Antivirus scan करना"],a:0},{q:"Linux boot में कौन-सा मुख्य भाग memory में load होता है?",o:["Kernel","Spreadsheet","Wallpaper"],a:0}]},
+{n:"Linux Commands — pwd, ls, cd, mkdir, rmdir",hi:"स्थान देखना और directories संभालना",icon:"⌨️",html:`<table><tr><th>Command</th><th>काम</th><th>उदाहरण</th></tr><tr><td><code>pwd</code></td><td>वर्तमान directory दिखाना</td><td><code>pwd</code></td></tr><tr><td><code>ls</code></td><td>फाइल/डायरेक्टरी सूची</td><td><code>ls</code></td></tr><tr><td><code>cd</code></td><td>directory बदलना</td><td><code>cd Documents</code></td></tr><tr><td><code>mkdir</code></td><td>नई directory बनाना</td><td><code>mkdir School</code></td></tr><tr><td><code>rmdir</code></td><td>खाली directory हटाना</td><td><code>rmdir School</code></td></tr></table>`,quiz:[{q:"वर्तमान working directory देखने की command कौन-सी है?",o:["pwd","ls","cd"],a:0},{q:"नई directory बनाने के लिए क्या उपयोग होगा?",o:["mkdir","rmdir","cat"],a:0}]},
+{n:"Linux Commands — touch, cat, rm, mv, clear",hi:"फाइल बनाना, पढ़ना और व्यवस्थित करना",icon:"📝",html:`<table><tr><th>Command</th><th>काम</th><th>उदाहरण</th></tr><tr><td><code>touch</code></td><td>नई खाली file बनाना/ timestamp update</td><td><code>touch notes.txt</code></td></tr><tr><td><code>cat</code></td><td>फाइल की सामग्री दिखाना</td><td><code>cat notes.txt</code></td></tr><tr><td><code>rm</code></td><td>फाइल हटाना</td><td><code>rm notes.txt</code></td></tr><tr><td><code>mv</code></td><td>फाइल move या rename करना</td><td><code>mv old.txt new.txt</code></td></tr><tr><td><code>clear</code></td><td>टर्मिनल स्क्रीन साफ करना</td><td><code>clear</code></td></tr></table><div class="remember">सावधानी: rm से फाइल हट सकती है। अभ्यास में केवल अपनी बनाई sample files पर काम करें।</div>`,quiz:[{q:"फाइल की सामग्री देखने के लिए कौन-सी command है?",o:["cat","touch","clear"],a:0},{q:"फाइल rename या move करने के लिए कौन-सी command है?",o:["mv","pwd","mkdir"],a:0}]},
+{n:"Chapter 5 — Quick Revision और मुख्य अंतर",hi:"DOS और Linux का दोहराव",icon:"🎯",html:`<h3>DOS और Linux में अंतर</h3><table><tr><th>आधार</th><th>MS-DOS</th><th>Linux</th></tr><tr><td>Interface</td><td>मुख्यतः CLI</td><td>CLI और GUI दोनों उपलब्ध</td></tr><tr><td>Commands</td><td>DIR, CLS, COPY</td><td>ls, clear, cp</td></tr><tr><td>Directory root</td><td>Drive-based paths</td><td>एक root <code>/</code></td></tr><tr><td>Nature</td><td>Microsoft का proprietary DOS</td><td>Open-source kernel और distributions</td></tr></table><p><b>Revision Tip:</b> DOS में COMMAND.COM, CONFIG.SYS, AUTOEXEC.BAT और Internal/External commands याद रखें। Linux में Kernel, Shell, directories और basic commands याद रखें।</p>`,quiz:[{q:"DOS में DIR के समान Linux command कौन-सी है?",o:["ls","pwd","touch"],a:0},{q:"DOS में CLS के समान Linux command कौन-सी है?",o:["clear","mv","cat"],a:0}]},
+{n:"Chapter 5 — Final Combined Test",hi:"DOS और Linux का अभ्यास परीक्षण",icon:"🏆",html:`<div class="def">इस अंतिम टेस्ट में Chapter 5 के DOS और Linux दोनों भागों के मुख्य concepts पर प्रश्न हैं।</div><p>हर प्रश्न ध्यान से पढ़ें और सही विकल्प चुनें।</p>`,quiz:[{q:"MS-DOS का पूरा नाम क्या है?",o:["Microsoft Disk Operating System","Main Data Office System","Memory Disk Output Service"],a:0},{q:"DOS में command interpreter कौन-सा है?",o:["COMMAND.COM","CONFIG.SYS","AUTOEXEC.BAT"],a:0},{q:"POST का पूरा नाम क्या है?",o:["Power-On Self-Test","Program Output System Tool","Power Open Setup Test"],a:0},{q:"DOS में फाइलों की सूची कौन दिखाता है?",o:["DIR","CLS","REN"],a:0},{q:"DOS में नया folder बनाने की command?",o:["MD","RD","TYPE"],a:0},{q:"DOS में plain text extension कौन-सा है?",o:[".TXT",".BAT",".EXE"],a:0},{q:"AUTOEXEC.BAT कब चलती है?",o:["Startup पर","केवल shutdown पर","केवल print करते समय"],a:0},{q:"External command का उदाहरण कौन-सा है?",o:["EDIT","DIR","CLS"],a:0},{q:"FORMAT command का जोखिम क्या है?",o:["डेटा मिट सकता है","RAM अपने-आप बढ़ती है","स्क्रीन साफ होती है"],a:0},{q:"Linux का filesystem किससे शुरू होता है?",o:["/","C:","D:"],a:0},{q:"Linux में kernel का काम क्या है?",o:["Hardware और system resources manage करना","केवल text लिखना","वेबसाइट डिजाइन करना"],a:0},{q:"Bash का पूरा नाम क्या है?",o:["Bourne Again Shell","Basic Application System Host","Binary Access Shell"],a:0},{q:"Linux में current directory कौन दिखाता है?",o:["pwd","ls","mv"],a:0},{q:"Linux में directory list कौन दिखाता है?",o:["ls","touch","clear"],a:0},{q:"Linux में नई directory बनाने की command?",o:["mkdir","rmdir","cat"],a:0},{q:"Linux में file content देखने की command?",o:["cat","pwd","touch"],a:0},{q:"Linux में file move/rename command?",o:["mv","rm","clear"],a:0},{q:"Swap किसमें मदद करता है?",o:["Virtual memory","Display color","Sound output"],a:0},{q:"GRUB क्या है?",o:["Bootloader","Text editor","File extension"],a:0},{q:"Linux को सामान्यतः किस रूप में जाना जाता है?",o:["Open-source kernel ecosystem","केवल paid word processor","Hardware device"],a:0}]}
 ];
+
+// नया अतिरिक्त Story Mode topic: पुराने सभी Chapter 5 topics सुरक्षित रखते हुए अंत में जोड़ा गया।
+CH5_TOPICS.push({n:"फाइनल कहानी — एक डिजिटल शहर का निर्माण (पूरा Chapter 5 एक साथ)",hi:"DOS से Linux तक की जुड़ी हुई कहानी",icon:"🏙️",html:`
+<div class="def"><b>इस पाठ का उद्देश्य:</b> Chapter 5 के पहले पढ़े गए सभी टॉपिक्स को एक ही क्रमबद्ध कहानी में जोड़ना। यह अतिरिक्त कहानी है; इससे पहले के किसी topic, revision या test को हटाया नहीं गया है।</div>
+<h3>🏗️ स्टेज 1 — खाली जमीन, सर्वे और शहर का नक्शा</h3>
+<p>कल्पना करो कि हमें एक नया डिजिटल शहर बनाना है। इस शहर का नाम है <b>कंप्यूटर</b>। शहर को चलाने के लिए एक व्यवस्था चाहिए। पुराने कंप्यूटरों में ऐसी command-based व्यवस्था के उदाहरण के रूप में <b>MS-DOS (Microsoft Disk Operating System)</b> को समझते हैं। DOS में उपयोगकर्ता अधिकतर keyboard से command लिखकर काम करता है; इसे Command Line Interface (CLI) कहते हैं।</p>
+<p>शहर बनाने से पहले सर्वेयर आता है। कंप्यूटर में यह शुरुआती जिम्मेदारी पारंपरिक PC के <b>BIOS</b> (Basic Input/Output System) या आधुनिक सिस्टम के <b>UEFI firmware</b> की होती है। Power button दबाने पर firmware hardware को initialize करता है और startup की शुरुआती जाँच में मदद करता है। इस जाँच को <b>POST — Power-On Self-Test</b> कहते हैं। इसमें RAM और जरूरी hardware की स्थिति जाँची जा सकती है।</p>
+<p>जाँच के बाद सिस्टम boot device से आगे बढ़ता है। पुराने BIOS-based सिस्टम में <b>Boot Record/Boot Sector</b> में boot code और partition से जुड़ी जानकारी हो सकती है। यह boot प्रक्रिया को आगे बढ़ाने में मदद करता है। इसे शहर के निर्माण की पहली दिशा बताने वाले संकेत की तरह समझो—यह पूरा Operating System खुद नहीं है।</p>
+<h3>🧱 स्टेज 2 — मुख्य इंजीनियर, पते का रजिस्टर और मुंशी</h3>
+<p>अब DOS की जरूरी system files की बारी आती है। पुराने MS-DOS में <b>IO.SYS</b> input/output से जुड़े हिस्सों के लिए और <b>MSDOS.SYS</b> मुख्य DOS system module/kernel से जुड़ा था। अलग-अलग DOS versions में फाइलों की भूमिका और आंतरिक बनावट बदल सकती है।</p>
+<p>शहर में फाइलें कहाँ रखी हैं, यह जानने के लिए File System की जरूरत होती है। FAT का पूरा नाम <b>File Allocation Table</b> है। इसे पते के रजिस्टर की तरह समझो: यह disk पर file के data clusters की स्थिति और आपसी links का हिसाब रखने में मदद करता है। यह फाइलों के पूरे नामों की साधारण सूची मात्र नहीं है।</p>
+<p>इसके बाद आता है <b>COMMAND.COM</b>—DOS का Command Interpreter। इसे शहर का मुंशी समझो। उपयोगकर्ता command देता है; COMMAND.COM built-in command को पहचानता है या जरूरत पड़ने पर external program खोजकर चलाने में मदद करता है।</p>
+<h3>🪟 स्टेज 3 — शहर की सेटिंग और अपने-आप होने वाली सुबह की तैयारी</h3>
+<p>शहर में काम शुरू होने से पहले कुछ नियम तय होते हैं। <b>CONFIG.SYS</b> DOS startup की configuration file थी। इसमें memory, files और device drivers से जुड़ी settings दी जा सकती थीं।</p>
+<p><b>AUTOEXEC.BAT</b> एक batch file थी। इसमें लिखे commands startup के समय अपने-आप क्रम से चलाए जा सकते थे—जैसे रोज सुबह दुकान खुलने से पहले तय routine पूरी होना।</p>
+<p>अब हर फाइल की पहचान के लिए उसके नाम के अंत में extension देखो। <b>.EXE</b> executable program, <b>.COM</b> पुराने DOS का executable format, <b>.BAT</b> commands वाली batch file और <b>.TXT</b> plain text file का सामान्य extension है। Extension पहचान का संकेत देता है; केवल extension देखकर किसी file की सुरक्षा की गारंटी नहीं मिलती।</p>
+<h3>🧹 स्टेज 4 — DOS शहर का रोजमर्रा का कामकाज</h3>
+<p>शहर तैयार है, अब रोज के काम करने हैं। <b>Internal Commands</b> COMMAND.COM के built-in commands हैं। <b>External Commands</b> अलग program files के रूप में उपलब्ध होते हैं।</p>
+<table><tr><th>Command</th><th>काम</th><th>शहर/घर का उदाहरण</th></tr>
+<tr><td>CLS</td><td>स्क्रीन साफ करना</td><td>लिखने वाला बोर्ड साफ करना</td></tr><tr><td>DIR</td><td>फाइलों और folders की सूची</td><td>गोदाम की सूची देखना</td></tr><tr><td>COPY</td><td>फाइल की कॉपी</td><td>कागज की दूसरी प्रति बनाना</td></tr><tr><td>TYPE</td><td>Text file दिखाना</td><td>लिखा हुआ पत्र पढ़ना</td></tr><tr><td>REN</td><td>फाइल का नाम बदलना</td><td>डिब्बे का label बदलना</td></tr><tr><td>DEL</td><td>फाइल हटाना</td><td>अनावश्यक कागज हटाना</td></tr><tr><td>MD</td><td>नई directory बनाना</td><td>नया कमरा बनाना</td></tr><tr><td>CD</td><td>directory बदलना</td><td>दूसरे कमरे में जाना</td></tr><tr><td>RD</td><td>खाली directory हटाना</td><td>खाली कमरा हटाना</td></tr><tr><td>DATE / TIME</td><td>तारीख / समय दिखाना या बदलना</td><td>कैलेंडर / घड़ी</td></tr><tr><td>VOL</td><td>Drive का volume label और serial जानकारी</td><td>गोदाम का पहचान-पट्ट</td></tr></table>
+<p><b>EDIT</b> DOS का text editor था—इसे लिखे हुए नोट में बदलाव करने वाले संपादक की तरह समझो। <b>FORMAT</b> किसी volume को filesystem के लिए तैयार करता है। सावधान: formatting से मौजूदा data मिट सकता है; इसे असली drive पर अभ्यास के लिए न चलाएँ।</p>
+<h3>🐧 स्टेज 5 — जरूरत बढ़ी, आया Linux का आधुनिक शहर</h3>
+<p>समय के साथ कंप्यूटर की जरूरतें बढ़ीं। हमें multi-user, multitasking और flexible व्यवस्था चाहिए। यहाँ Linux की दुनिया आती है। तकनीकी रूप से <b>Linux एक open-source kernel</b> है; Ubuntu और Fedora जैसे Linux distributions में kernel के साथ utilities और अन्य software मिलकर पूरा उपयोगी Operating System environment बनाते हैं।</p>
+<ul><li><b>Open Source:</b> source code संबंधित license की शर्तों के अनुसार देखा, बदला और साझा किया जा सकता है।</li><li><b>Multi-user:</b> अलग-अलग user accounts बनाए जा सकते हैं।</li><li><b>Multitasking:</b> कई processes/tasks संभाली जा सकती हैं।</li><li><b>Security:</b> users, permissions और updates सुरक्षा में मदद करते हैं; Linux virus-proof नहीं है।</li></ul>
+<h3>🏛️ स्टेज 6 — Linux शहर की चार मुख्य परतें</h3>
+<p>Linux architecture को एक व्यवस्था की तरह समझो। <b>Hardware</b> में CPU, RAM, disk और keyboard जैसे असली उपकरण आते हैं। <b>Kernel</b> processes, memory, devices और system resources संभालता है। <b>Shell</b> user की commands को समझकर kernel/system से काम करवाने का interface देता है। <b>Utilities</b> अलग-अलग कामों के छोटे programs और tools हैं। आसान क्रम: User → Shell/Utilities → Kernel → Hardware (वास्तविक interaction इससे अधिक विस्तृत हो सकता है)।</p>
+<p>Linux में कई shells मिलते हैं: <b>sh</b> (Bourne Shell), <b>Bash</b> (Bourne Again Shell), <b>csh</b> (C Shell) और <b>ksh</b> (Korn Shell)। ये command interpreters और scripting environments हैं; हर Linux computer का default shell एक जैसा होना जरूरी नहीं।</p>
+<h3>🌳 स्टेज 7 — Linux का File System और Permissions</h3>
+<p>Linux filesystem एक पेड़ जैसी directory hierarchy है जिसकी शुरुआत <b>/</b> (root directory) से होती है। ध्यान दो: <b>/</b> पूरी directory व्यवस्था की जड़ है, जबकि <b>/root</b> administrator यानी root user का home directory है। <b>/home</b> सामान्य users के home folders का स्थान है। <b>/bin</b> परंपरागत रूप से जरूरी user commands रखता है; कई आधुनिक distributions में यह /usr/bin से जुड़ा हो सकता है।</p>
+<p>फाइल और directory पर permissions भी हो सकती हैं: <b>r = Read</b> (पढ़ना), <b>w = Write</b> (बदलना/लिखना), <b>x = Execute</b> (चलाना; directory के संदर्भ में उसमें प्रवेश/traverse करना)। <b>chmod</b> command permissions बदलती है। इसे चाबी और अनुमति की व्यवस्था समझो, लेकिन यह अकेले हर virus या attack को नहीं रोकती।</p>
+<h3>🧰 स्टेज 8 — Linux install करने से पहले तैयारी</h3>
+<p>नया शहर बसाने से पहले जगह, सामान और नक्शा जाँचा जाता है। Linux installation से पहले जरूरी data का <b>backup</b> लो, hardware requirements देखो, सही Linux distribution की ISO image प्राप्त करो और bootable USB/installation media तैयार करो। Backup इसलिए जरूरी है क्योंकि partitioning या installation में गलती से data loss हो सकता है।</p>
+<h3>🚜 स्टेज 9 — Hard Drive Partitioning: जमीन का बँटवारा</h3>
+<p>Storage disk को अलग logical हिस्सों में बाँटना <b>Partitioning</b> कहलाता है। Linux में <b>Root partition (/)</b> मुख्य filesystem को रखता है। कई installations में ext4 filesystem इस्तेमाल हो सकता है, लेकिन यह एकमात्र विकल्प नहीं है। <b>Swap</b> memory pressure के समय virtual memory support दे सकता है; यह RAM जितना तेज नहीं होता और हर system में अलग swap partition होना जरूरी नहीं—swap file भी हो सकती है।</p>
+<h3>🚪 स्टेज 10 — Installation, GRUB और पहली शुरुआत</h3>
+<p>अब installer Linux की files को चुने हुए partitions में install और configure करता है। Startup पर <b>GRUB (GRand Unified Bootloader)</b> जैसा bootloader menu दिख सकता है। यदि सिस्टम में कई bootable operating systems configure हैं, तो menu से चुनाव किया जा सकता है। GRUB boot प्रक्रिया में Linux kernel को शुरू करने में मदद करता है। यह दरबान का उदाहरण है, लेकिन menu में Windows तभी दिखेगा जब वह मौजूद और सही तरह configure हो।</p>
+<h3>⌨️ स्टेज 11 — Linux शहर के रोजमर्रा के Commands</h3>
+<table><tr><th>Command</th><th>काम</th><th>देसी याद</th></tr>
+<tr><td><code>pwd</code></td><td>वर्तमान directory का path</td><td>मैं अभी किस पते पर हूँ?</td></tr><tr><td><code>ls</code></td><td>फाइल/डायरेक्टरी की सूची</td><td>इस कमरे में क्या-क्या है?</td></tr><tr><td><code>cd</code></td><td>directory बदलना</td><td>दूसरे कमरे में जाना</td></tr><tr><td><code>mkdir</code></td><td>नई directory बनाना</td><td>नया कमरा बनाना</td></tr><tr><td><code>rmdir</code></td><td>खाली directory हटाना</td><td>खाली कमरा हटाना</td></tr><tr><td><code>touch</code></td><td>file बनाना या timestamp बदलना</td><td>नई खाली कॉपी रखना</td></tr><tr><td><code>cat</code></td><td>file का content दिखाना</td><td>कॉपी में लिखा पढ़ना</td></tr><tr><td><code>rm</code></td><td>file हटाना</td><td>कागज हटाना—सावधानी से</td></tr><tr><td><code>mv</code></td><td>file/folder move या rename करना</td><td>सामान दूसरी जगह रखना</td></tr><tr><td><code>clear</code></td><td>terminal screen साफ करना</td><td>बोर्ड साफ करना</td></tr></table>
+<div class="remember"><b>पूरी कहानी का क्रम याद रखो:</b> DOS का परिचय → BIOS/POST → Boot Record → DOS system files और FAT → COMMAND.COM → CONFIG.SYS/AUTOEXEC.BAT → File Extensions → Internal/External Commands → Linux परिचय → Architecture और Shell → File System/Permissions → तैयारी → Partitioning → Installation/GRUB → Linux Commands। यही Chapter 5 की पूरी यात्रा है।</div>
+`,quiz:[{q:"POST का मुख्य उद्देश्य क्या है?",o:["Startup पर शुरुआती hardware जाँच","फाइल rename करना","Linux partition मिटाना"],a:0},{q:"FAT का पूरा नाम क्या है?",o:["File Allocation Table","Fast Access Terminal","File Action Tool"],a:0},{q:"COMMAND.COM क्या है?",o:["DOS Command Interpreter","Linux Kernel","BIOS chip"],a:0},{q:"CONFIG.SYS मुख्यतः किससे जुड़ी है?",o:["DOS startup configuration","Text file पढ़ना","Linux shell"],a:0},{q:".BAT किस प्रकार की file है?",o:["Batch file","Plain text only","BIOS file"],a:0},{q:"FORMAT command के साथ कौन-सी सावधानी जरूरी है?",o:["Data मिट सकता है","RAM अपने-आप बढ़ती है","Virus हटना निश्चित है"],a:0},{q:"Linux तकनीकी रूप से क्या है?",o:["Open-source kernel; distributions पूरा environment देते हैं","केवल text editor","एक प्रकार का keyboard"],a:0},{q:"Linux में root directory कौन-सी है?",o:["/","/root","/home"],a:0},{q:"chmod किस काम आता है?",o:["File permissions बदलना","Disk को format करना","Boot menu खोलना"],a:0},{q:"GRUB क्या है?",o:["Bootloader","Text editor","File extension"],a:0},{q:"वर्तमान working directory देखने की command कौन-सी है?",o:["pwd","ls","touch"],a:0},{q:"नई directory बनाने की command कौन-सी है?",o:["mkdir","rmdir","clear"],a:0}]});
+
+// हर Chapter 5 topic के साथ समझने वाली कहानी और देसी उदाहरण जोड़ें।
+const CH5_STORY_EXAMPLES = [
+{story:'एक देसी कहानी समझो: गाँव की राशन दुकान में मालिक, मुनीम और काम करने वाले अलग-अलग जिम्मेदारी निभाते हैं। DOS में भी Boot Record, system files और COMMAND.COM जैसे हिस्से मिलकर कंप्यूटर को शुरू करवाते और commands चलवाते हैं। याद रखने की बात: DOS पूरा सिस्टम है, COMMAND.COM उसका command समझने वाला हिस्सा है।',example:'उदाहरण: जैसे दुकान पर आप मुनीम से कहते हो ‘रजिस्टर खोलो’, वैसे DOS में यूज़र command लिखकर कंप्यूटर को काम बताता है।'},
+{story:'कहानी: सुबह स्कूल खुलने से पहले चौकीदार ताला खोलता है, फिर शिक्षक और विद्यार्थी अंदर आते हैं। Booting में भी पहले firmware शुरुआती काम करता है, फिर boot प्रक्रिया आगे बढ़ती है और operating system तैयार होता है।',example:'उदाहरण: कंप्यूटर बंद था, आपने Power बटन दबाया—यह Cold Boot है। चालू कंप्यूटर को Restart करना Warm Boot कहलाता है।'},
+{story:'कहानी: बस यात्रा शुरू करने से पहले ड्राइवर टायर, ब्रेक और ईंधन देखता है। POST भी कंप्यूटर चालू होते समय जरूरी hardware की शुरुआती जाँच करता है। BIOS/UEFI firmware startup को आगे बढ़ाने में मदद करता है।',example:'देसी उदाहरण: जैसे घर से निकलने से पहले बाइक की basic checking करते हो, वैसे POST कंप्यूटर की शुरुआती checking है।'},
+{story:'कहानी: दुकान में एक व्यक्ति ग्राहक की बात सुनकर सही कर्मचारी तक काम पहुँचाता है। COMMAND.COM भी command पढ़कर समझता है कि कौन-सा built-in काम चलाना है या कौन-सा program खोलना है। MSDOS.SYS DOS के core system हिस्से से जुड़ा है।',example:'उदाहरण: DOS में CLS लिखने पर COMMAND.COM command पहचानता है और स्क्रीन साफ करने का काम करवाता है।'},
+{story:'कहानी: घर में सुबह की routine लिखी हो—पहले पानी की मोटर, फिर लाइट, फिर दुकान खोलना—तो काम तय क्रम में होता है। CONFIG.SYS startup की configuration रखती थी और AUTOEXEC.BAT startup commands चलाती थी।',example:'देसी उदाहरण: CONFIG.SYS को घर की setting-list और AUTOEXEC.BAT को रोज सुबह अपने-आप होने वाली routine समझो।'},
+{story:'कहानी: जैसे स्कूल की कॉपी पर नाम के साथ विषय लिखा हो, उससे पता चलता है कॉपी किस काम की है। File extension भी नाम के अंत में file का प्रकार बताता है।',example:'उदाहरण: result.txt text file, setup.exe चलने वाला program और run.bat commands की batch file हो सकती है। Extension देखकर संकेत मिलता है, लेकिन file सुरक्षित है या नहीं यह केवल extension से तय नहीं होता।'},
+{story:'कहानी: दुकान में कुछ सामान काउंटर के अंदर हमेशा उपलब्ध रहता है, जबकि कुछ सामान गोदाम से लाना पड़ता है। Internal commands COMMAND.COM में built-in रहती हैं; External commands के लिए अलग program file चाहिए।',example:'उदाहरण: DIR और CLS internal commands हैं; EDIT और FORMAT जैसे commands पारंपरिक DOS में external utilities के उदाहरण हैं।'},
+{story:'कहानी: मेज पर रखी कॉपियों की सूची देखना, मेज साफ करना, एक कॉपी की नकल बनाना और कॉपी पढ़ना—चार अलग काम हैं। DOS में DIR सूची दिखाता है, CLS स्क्रीन साफ करता है, COPY फाइल की copy बनाता है और TYPE text दिखाता है।',example:'देसी उदाहरण: DIR = अलमारी की सूची, CLS = लिखने वाला बोर्ड साफ करना, COPY = नोट्स की photocopy, TYPE = कॉपी का लिखा पढ़ना। अभ्यास sample files पर करो।'},
+{story:'कहानी: घर में किसी डिब्बे का नाम बदलना, नया कमरा बनाना, कमरे में जाना और खाली कमरा हटाना अलग-अलग काम हैं। REN नाम बदलता है, MD directory बनाता है, CD directory बदलता है, RD खाली directory हटाता है और DEL file हटाता है।',example:'देसी उदाहरण: REN = डिब्बे पर नया label, MD = नया कमरा, CD = उस कमरे में जाना। DEL/RD हटाने वाले काम हैं—असली जरूरी files पर प्रयोग मत करना।'},
+{story:'कहानी: दीवार की घड़ी समय बताती है, कैलेंडर तारीख और दुकान के बोर्ड पर दुकान/ड्राइव का नाम लिखा हो सकता है। DATE तारीख, TIME समय और VOL drive की volume जानकारी दिखाता है।',example:'उदाहरण: DATE = आज कौन-सी तारीख, TIME = अभी कितना समय, VOL C: = C drive का volume label/serial जानकारी।'},
+{story:'कहानी: EDIT को कागज पर लिखे नोट को सुधारने वाला editor समझो। FORMAT को नई कॉपी/रजिस्टर को उपयोग के लिए तैयार करने जैसा समझ सकते हो—लेकिन digital drive format करने पर पुराना data मिट सकता है।',example:'सुरक्षित उदाहरण: EDIT NOTES.TXT से text संपादित किया जा सकता है। FORMAT का अभ्यास असली disk पर मत करना; केवल शिक्षक की देखरेख में सुरक्षित test environment में समझना।'},
+{story:'कहानी: Linux को ऐसे साझा सामुदायिक पुस्तकालय की तरह समझो जिसका नियम और बहुत-सा source code सबके लिए उपलब्ध होता है। अलग-अलग लोग अपने हिसाब से उपयोग कर सकते हैं। Multi-user का अर्थ अलग accounts और multitasking का अर्थ कई processes संभालना है।',example:'देसी उदाहरण: Ubuntu या Fedora Linux-based distributions हैं। Open-source का मतलब लाइसेंस के नियमों के अनुसार code देखना/बदलना/बाँटना; इसका मतलब यह नहीं कि हर चीज बिना नियम के है।'},
+{story:'कहानी: एक स्कूल में भवन hardware है, प्रधानाचार्य जैसा मुख्य प्रबंधक kernel है, सूचना देने वाला कार्यालय shell है और अलग-अलग विभाग utilities हैं। हर भाग का अपना काम है।',example:'देसी उदाहरण: आप shell में command देते हो; shell उसे kernel तक पहुँचाने में मदद करता है; kernel CPU, RAM और devices जैसे संसाधन संभालता है।'},
+{story:'कहानी: एक ही भाषा बोलने के अलग अंदाज़ होते हैं। वैसे ही Linux में sh, Bash, csh और ksh अलग-अलग shells हैं—वे commands और scripts चलाने का environment देते हैं।',example:'उदाहरण: कई Linux systems में Bash आम है। `echo Hello` जैसी command shell में text दिखा सकती है। हर computer में default shell एक जैसा होना जरूरी नहीं।'},
+{story:'कहानी: गाँव का नक्शा मुख्य चौक से गलियों में बँटता है। Linux filesystem भी सबसे ऊपर `/` root से शुरू होकर folders में फैलता है। `/home` सामान्य users के घर जैसा और `/root` administrator user का home है।',example:'देसी उदाहरण: `/home/raju/Documents` को राजू के घर के अंदर Documents वाली अलमारी समझो। `/bin` में जरूरी commands/programs होते हैं; आधुनिक systems में यह `/usr/bin` से जुड़ा हो सकता है।'},
+{story:'कहानी: नया घर बनाने से पहले सामान की सूची, खर्च, जगह और जरूरी कागज जाँचे जाते हैं। Linux install करने से पहले backup, hardware requirements और bootable USB तैयार करना भी ऐसी ही तैयारी है।',example:'देसी उदाहरण: जैसे खेत की बुवाई से पहले बीज और पानी का इंतजाम करते हो, वैसे installation से पहले official ISO, सही USB और backup तैयार रखो।'},
+{story:'कहानी: एक बड़े खेत को अलग-अलग क्यारियों में बाँटने से हर हिस्से का काम तय हो जाता है। Partitioning में disk को logical हिस्सों में बाँटा जाता है। Root `/` मुख्य filesystem है और swap memory pressure में मदद कर सकता है।',example:'देसी उदाहरण: खेत की अलग क्यारी की तरह partitions अलग उद्देश्य निभाते हैं; लेकिन गलत partition चुनने से data खो सकता है, इसलिए बिना backup और समझ के बदलाव न करें।'},
+{story:'कहानी: घर में सामान रखने के बाद घर का मुख्य दरवाजा खुलता है और फिर लोग अपने कमरे तक पहुँचते हैं। Linux installation के बाद bootloader जैसे GRUB, kernel को शुरू करने की प्रक्रिया में मदद करता है।',example:'उदाहरण: Bootable USB से installer शुरू होता है; setup पूरा होने के बाद restart पर GRUB menu दिख सकता है, फिर चुना गया Linux kernel load होता है।'},
+{story:'कहानी: किसी नए गाँव में पहले अपना पता देखना, फिर गलियों की सूची देखना, रास्ता बदलना और नया कमरा बनाना—ये रोजमर्रा के काम हैं। pwd, ls, cd, mkdir और rmdir भी directories के साथ ऐसे काम करते हैं।',example:'देसी उदाहरण: `pwd` = अभी किस गली/पते पर हो, `ls` = आसपास की सूची, `cd Documents` = Documents में जाना, `mkdir Notes` = नया folder बनाना। `rmdir` खाली folder हटाता है।'},
+{story:'कहानी: कॉपी बनाना, लिखी बात पढ़ना, सामान दूसरी जगह रखना और मेज साफ करना अलग काम हैं। touch, cat, mv और clear ऐसे काम करते हैं; rm file हटाता है।',example:'देसी उदाहरण: `touch notes.txt` खाली file बनाता है, `cat notes.txt` उसका text दिखाता है, `mv old.txt new.txt` नाम/स्थान बदलता है। `rm` हटाने वाली command है—केवल test file पर सीखो।'},
+{story:'कहानी: परीक्षा से पहले दो कॉलम बनाकर तुलना करना आसान होता है। DOS में आम तौर पर DIR/CLS जैसे commands और drive-based paths मिलते हैं; Linux में ls/clear और एक root `/` वाली filesystem होती है।',example:'देसी उदाहरण: DOS का `DIR` और Linux का `ls` दोनों सूची दिखाते हैं; DOS का `CLS` और Linux का `clear` स्क्रीन साफ करते हैं। नाम अलग, काम मिलता-जुलता।'},
+{story:'कहानी: जैसे साल के अंत में पूरे पाठ्यक्रम का छोटा टेस्ट लेकर पता करते हैं कि क्या याद है, यह test भी DOS और Linux के मुख्य points दोहराने के लिए है।',example:'देसी उदाहरण: हर सवाल में पहले command का काम याद करो, फिर सही विकल्प चुनो। गलती हो तो उसी topic की कहानी और table दोबारा पढ़ो।'},
+];
+CH5_TOPICS.forEach((topic, index) => {
+  const lesson = CH5_STORY_EXAMPLES[index];
+  if (lesson) topic.html += `<section class="sv-story-example"><h3>📖 समझने वाली कहानी</h3><p>${lesson.story}</p><h3>🏡 देसी उदाहरण</h3><p>${lesson.example}</p></section>`;
+});
+
+const ALL = CH1_TOPICS.concat(TOPICS, CH3_TOPICS, CH4_TOPICS, CH5_TOPICS);   // केवल COPA के मूल 3 Chapters
+const CHAPTERS=[
+ {name:"Chapter 1 — Trade Introduction and Safety Precautions",hi:"ट्रेड परिचय और सुरक्षा सावधानियाँ",start:0,count:22,icon:"📘",
+  parts:[[0,"🟦 Part 1 — Trade Introduction"],[1,"🟩 Part 2 — Scope और Progression"],[3,"🟥 Part 3 — Safety Rules"],[5,"🟨 Part 4 — Safety Symbols और Fire"],[8,"🧯 Part 5 — Fire Classes और Extinguishers"],[10,"🏫 Part 6 — ITI और Training System"],[11,"🦺 Part 7 — PPE और First Aid"],[14,"🚨 Part 8 — Emergency और Ergonomics"],[16,"🧹 Part 9 — Housekeeping और Reporting"],[18,"♻️ Part 10 — Environment और Lab Behaviour"],[20,"🎯 Revision — Chapter Summary"]]},
+ {name:"Chapter 2 — Introduction to Computer Components",hi:"कंप्यूटर घटकों का परिचय",start:22,count:41,icon:"💻",
+  parts:[[22,"🟦 Part 1 — Computer की नींव (Basics)"],[31,"🟩 Part 2 — Computer के उपयोग (Uses)"],[32,"🟨 Part 3 — Input Devices (इनपुट डिवाइस)"],[44,"🟧 Part 4 — Output Devices (आउटपुट डिवाइस)"],[51,"🟪 Part 5 — Computer Memory (मेमोरी)"],[59,"🟥 Part 6 — Motherboard और Microprocessor"],[61,"🎯 Revision — Chapter Summary"]]},
+ {name:"Chapter 3 — Computer Software",hi:"कंप्यूटर सॉफ्टवेयर",start:63,count:35,icon:"📗",
+  parts:[[63,"🟦 Part 1 — Software और उसका Classification"],[93,"🟧 Part 2 — Hardware/Software Issues और Solution"],[94,"🔓 Part 3 — Open Source Software"],[95,"🔌 Part 4 — Booting"],[96,"🎯 Revision — Chapter 3 Summary"]]}
+,
+ {name:CH4_CFG.name,hi:CH4_CFG.hi,start:98,count:CH4_TOPICS.length,icon:CH4_CFG.icon,
+  parts:CH4_PARTS(98)},
+ {name:"Chapter 5 — DOS Command Line Interface and Linux Operating System",hi:"डॉस कमांड लाइन इंटरफेस और लिनक्स ऑपरेटिंग सिस्टम",start:98+CH4_TOPICS.length,count:CH5_TOPICS.length,icon:"🐧",parts:[[98+CH4_TOPICS.length,"💾 Part 1 — MS-DOS Structure और Booting"],[98+CH4_TOPICS.length+6,"⌨️ Part 2 — DOS Commands"],[98+CH4_TOPICS.length+11,"🐧 Part 3 — Linux परिचय और Architecture"],[98+CH4_TOPICS.length+15,"💽 Part 4 — Linux Installation और Booting"],[98+CH4_TOPICS.length+18,"🖥️ Part 5 — Linux Commands"],[98+CH4_TOPICS.length+20,"🎯 Quick Revision"],[98+CH4_TOPICS.length+21,"🏆 Final Test"]]}
+ ];
+// Multi-book catalogue: existing COPA lessons remain the first book.
+let SV_BOOKS = [
+  {id:'copa', title:'COPA — Computer Operator and Programming Assistant',
+   description:'ITI COPA की पढ़ाई, Notes और Quiz', icon:'💻', kind:'copa', chapterCount:5}
+];
+function svSaveBooks(){ localStorage.setItem('sv_books', JSON.stringify(SV_BOOKS)); }
+CHAPTERS.forEach(c=>{c.bookId='copa';});
 let chIdx=0;
 let cur=0; // start of Chapter 1
 const done=new Set(JSON.parse(localStorage.getItem('sv_done')||'[]'));
@@ -1841,21 +2270,71 @@ const prevBtn=document.getElementById('prevBtn');
 const nextBtn=document.getElementById('nextBtn');
 
 function saveState(){localStorage.setItem('sv_done',JSON.stringify([...done]));localStorage.setItem('sv_answered',JSON.stringify([...answered]));localStorage.setItem('sv_scores',JSON.stringify({right:qRight,total:qTotal}));localStorage.setItem('sv_last',JSON.stringify({chIdx,cur}));}
+let svSelectedBookId=null;
 function showDashboard(){
  dashboardMode=true;document.getElementById('content').style.display='none';document.querySelector('.nav').style.display='none';
  const d=document.getElementById('dashboard');d.style.display='block';
- let cards=CHAPTERS.map((c,i)=>{let n=chDone(c),pct=Math.round(n/c.count*100);return `<div class="card dashCard"><div style="font-size:28px">${c.icon}</div><h3>${c.name}</h3><p>${c.hi}</p><div class="dashTrack"><span style="width:${pct}%"></span></div><b>${n}/${c.count} Topics · ${pct}%</b><br><button class="quizBtn" onclick="dashboardOpenChapter(${i})">पढ़ाई शुरू करें →</button></div>`}).join('');
- d.innerHTML=`<div class="card"><h2 style="color:var(--primary)">👋 Welcome to StudyVerse</h2><p>आपकी COPA पढ़ाई का पूरा Dashboard</p><div class="statsGrid"><div class="stat"><b>${done.size}</b><span>Topics पढ़े</span></div><div class="stat"><b>${qRight}/${qTotal}</b><span>Quiz Score</span></div><div class="stat"><b>${ALL.length}</b><span>Total Topics</span></div></div><p><b>Last studied:</b> ${ALL[cur]?.n||'अभी शुरू नहीं किया'}</p><button class="quizBtn" onclick="resumeStudy()">▶ Continue Learning</button></div><h2 style="margin:14px 4px;color:var(--primary)">📚 आपके Chapters</h2>${cards}`;
+ const bookCards=SV_BOOKS.map(b=>{
+  const count=CHAPTERS.filter(c=>(c.bookId||'copa')===b.id).length;
+  return `<button class="card svBookCard svBookSelect" onclick="svOpenBook('${svEscapeHTML(b.id)}')"><div style="font-size:34px">${b.icon||'📚'}</div><h3>${escapeText(b.title)}</h3><p>${escapeText(b.description||'')}</p><b>${count} Chapters</b><span>Open Book →</span></button>`;
+ }).join('');
+ d.innerHTML=`<h2 class="svHomeTitle">📚 आपकी किताबें</h2><div class="svBookGrid">${bookCards}</div><div id="svBookChapters"></div>`;
  window.scrollTo(0,0);
+}
+function svOpenBook(bookId){
+ svSelectedBookId=bookId;
+ const book=SV_BOOKS.find(b=>b.id===bookId);if(!book)return;
+ const chapters=CHAPTERS.map((c,i)=>({c,i})).filter(x=>(x.c.bookId||'copa')===bookId);
+ const host=document.getElementById('svBookChapters');if(!host)return;
+ host.innerHTML=`<section class="card svBookChapterPanel"><button class="svBackBooks" onclick="showDashboard()">← सभी Books</button><h2>${book.icon||'📚'} ${escapeText(book.title)}</h2><p>${escapeText(book.description||'')}</p><h3>इस Book के Chapters</h3>
+ <div class="svChapterGrid">${chapters.length?chapters.map(({c,i})=>`<article class="card dashCard"><div style="font-size:25px">${c.icon||'📖'}</div><h3>${escapeText(c.name)}</h3><p>${escapeText(c.hi||'')}</p><b>${c.count} Topics</b><button class="quizBtn" onclick="dashboardOpenChapter(${i})">Open Chapter →</button></article>`).join(''):'<p>इस Book में अभी Chapter नहीं जोड़ा गया है।</p>'}</div></section>`;
+ host.scrollIntoView({behavior:'smooth'});
 }
 function dashboardOpenChapter(i){dashboardMode=false;document.getElementById('dashboard').style.display='none';document.getElementById('content').style.display='block';document.querySelector('.nav').style.display='flex';setCh(i);}
 function resumeStudy(){let st=JSON.parse(localStorage.getItem('sv_last')||'null');dashboardOpenChapter(st&&CHAPTERS[st.chIdx]?st.chIdx:0);if(st&&ALL[st.cur])goTo(st.cur);}
 function openAdmin(){if(!window.svIsAdmin){alert('Admin access केवल अधिकृत Admin के लिए है।');return;}adminPanel();}
 function adminPanel(){
  dashboardMode=true;document.getElementById('content').style.display='none';document.querySelector('.nav').style.display='none';const d=document.getElementById('dashboard');d.style.display='block';
- const t=ALL[cur];d.innerHTML=`<div class="card"><h2 style="color:var(--primary)">⚙️ Admin Panel</h2><p><b>Verified Admin:</b> आपका Admin access Firebase Authentication और server-verified Custom Claims से जाँचा गया है।</p><h3>वर्तमान Topic Edit करें</h3><label>Topic Title</label><input id="admTitle" class="admInput" value="${escapeAttr(t.n)}"><label>Notes / HTML Content</label><textarea id="admHtml" class="admInput" rows="12">${escapeText(t.html)}</textarea><button class="quizBtn" onclick="saveTopicEdit(${cur})">💾 Save Topic</button><button class="quizBtn" style="background:#64748b" onclick="showDashboard()">Dashboard</button><hr style="margin:20px 0"><h3>Student Progress Management</h3><p>Saved progress: ${done.size} topics · Quiz ${qRight}/${qTotal}</p><button class="quizBtn" style="background:var(--bad)" onclick="resetProgress()">Reset Student Progress</button></div>`;
+ const t=ALL[cur]||{n:'',html:''};
+ const chapterOptions=CHAPTERS.map((c,i)=>`<option value="${i}" ${i===chIdx?'selected':''}>${escapeText(c.name)}</option>`).join('');
+ d.innerHTML=`<div class="card svAdmin">
+ <h2 style="color:var(--primary)">⚙️ StudyVerse Admin Studio</h2>
+ <p>किताबें, Chapters और Topics मैनेज करें। बदलाव Publish करने पर Firebase में सेव होंगे।</p>
+ <div class="svAdminNotice" role="note"><b>🔐 Access Rules:</b> विद्यार्थी बिना Login केवल पढ़ सकते हैं। Admin Login केवल निर्धारित और verified Google Account के लिए है। Content जोड़ना, बदलना और हटाना Admin के लिए है। Firebase में असली Write सुरक्षा Firestore Rules लागू करते हैं।</div>
+ <div class="svAdminGrid">
+ <section class="svAdminBox"><h3>📚 Books</h3><label>नई Book का नाम</label><input id="svNewBookTitle" class="admInput" placeholder="जैसे: Computer Fundamentals"><label>विवरण</label><input id="svNewBookDesc" class="admInput" placeholder="Book का छोटा परिचय"><label>Icon / Emoji</label><input id="svNewBookIcon" class="admInput" value="📘"><button class="quizBtn" onclick="svAddBook()">＋ Add Book</button><div class="svBookAdminList">${SV_BOOKS.map(b=>`<div><b>${b.icon||'📚'} ${escapeText(b.title)}</b><small>${escapeText(b.description||'')}</small></div>`).join('')}</div></section>
+ <section class="svAdminBox"><h3>📖 Add Chapter (COPA)</h3><label>Chapter का नाम</label><input id="svNewChapterName" class="admInput" placeholder="Chapter का नाम"><label>हिंदी विवरण</label><input id="svNewChapterHi" class="admInput" placeholder="विवरण"><button class="quizBtn" onclick="svAddChapter()">＋ Add Chapter</button><p class="svHint">मौजूदा COPA Chapters: ${CHAPTERS.length}</p></section>
+ <section class="svAdminBox"><h3>📝 Add Topic</h3><label>Chapter चुनें</label><select id="svNewChapter" class="admInput">${chapterOptions}</select><label>Topic का नाम</label><input id="svNewTitle" class="admInput" placeholder="Topic title"><label>हिंदी नाम / विवरण</label><input id="svNewHi" class="admInput" placeholder="वैकल्पिक"><button class="quizBtn" onclick="svAddTopic()">＋ Add Topic</button></section>
+ </div>
+ <hr><h3>✍️ Topic Editor</h3><label>Topic चुनें</label><select id="svAdmTopic" class="admInput" onchange="svLoadTopicEditor()">${ALL.map((x,i)=>`<option value="${i}" ${i===cur?'selected':''}>${i+1}. ${escapeText(x.n)}</option>`).join('')}</select>
+ <label>Topic Title</label><input id="admTitle" class="admInput" value="${escapeAttr(t.n)}">
+ <div class="svToolbar">
+ <button type="button" onclick="svFmt('bold')"><b>B</b></button><button type="button" onclick="svFmt('italic')"><i>I</i></button><button type="button" onclick="svFmt('underline')"><u>U</u></button>
+ <button type="button" onclick="svFmt('insertUnorderedList')">• List</button><button type="button" onclick="svFmt('insertOrderedList')">1. List</button>
+ <button type="button" onclick="svFmt('justifyLeft')">⇤</button><button type="button" onclick="svFmt('justifyCenter')">↔</button><button type="button" onclick="svFmt('justifyRight')">⇥</button>
+ <select onchange="svFormatBlock(this.value);this.selectedIndex=0"><option value="">Heading</option><option value="h2">Heading 2</option><option value="h3">Heading 3</option><option value="p">Paragraph</option></select>
+ <input type="color" title="Text color" onchange="svFmt('foreColor',this.value)">
+ </div>
+ <div id="svRichEditor" class="svRichEditor" contenteditable="true">${t.html||'<p>यहाँ Notes लिखें…</p>'}</div>
+ <div class="svMediaGrid"><div><label>Image URL</label><input id="svImageUrl" class="admInput" placeholder="https://..."><button class="quizBtn" onclick="svInsertMedia('image')">Image जोड़ें</button></div><div><label>Video / YouTube URL</label><input id="svVideoUrl" class="admInput" placeholder="YouTube या MP4 लिंक"><button class="quizBtn" onclick="svInsertMedia('video')">Video जोड़ें</button></div><div><label>किसी भी वेबसाइट / PDF का Link</label><input id="svLinkUrl" class="admInput" placeholder="https://..."><input id="svLinkText" class="admInput" placeholder="Link का नाम"><button class="quizBtn" onclick="svInsertMedia('link')">Link जोड़ें</button></div></div>
+ <button class="quizBtn" onclick="svSaveRichTopic()">💾 Save & Publish Topic</button>
+ <button class="quizBtn" style="background:#64748b" onclick="showDashboard()">Student Dashboard देखें</button>
+ <hr><h3>🎨 Home Page Appearance</h3><label>मुख्य रंग</label><input type="color" id="svThemeColor" value="${getComputedStyle(document.documentElement).getPropertyValue('--primary').trim()||'#4f46e5'}"><label>Background</label><input type="color" id="svBgColor" value="#f1f3f9"><button class="quizBtn" onclick="svApplyTheme()">Apply Theme</button>
+ <hr><h3>Student Progress</h3><p>Saved progress: ${done.size} topics · Quiz ${qRight}/${qTotal}</p><button class="quizBtn" style="background:var(--bad)" onclick="resetProgress()">Reset Student Progress</button></div>`;
  window.scrollTo(0,0);
 }
+function svFmt(cmd,val=null){document.getElementById('svRichEditor').focus();document.execCommand(cmd,false,val);}
+function svFormatBlock(tag){if(tag)svFmt('formatBlock',tag);}
+function svLoadTopicEditor(){const i=+document.getElementById('svAdmTopic').value;cur=i;const t=ALL[i];document.getElementById('admTitle').value=t.n;document.getElementById('svRichEditor').innerHTML=t.html||'';}
+function svInsertMedia(kind){
+ const ed=document.getElementById('svRichEditor');ed.focus();
+ if(kind==='image'){const u=document.getElementById('svImageUrl').value.trim();if(!u)return alert('Image URL डालें');document.execCommand('insertHTML',false,`<p><img src="${escapeAttr(u)}" alt="Study image" style="max-width:100%;height:auto;border-radius:12px"></p>`);}
+ if(kind==='video'){const u=document.getElementById('svVideoUrl').value.trim();if(!u)return alert('Video URL डालें');let id=(u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/)||[])[1];let html=id?`<div class="svVideo"><iframe src="https://www.youtube-nocookie.com/embed/${id}" title="YouTube video" allowfullscreen loading="lazy"></iframe></div>`:`<p><video controls style="max-width:100%" src="${escapeAttr(u)}"></video></p>`;document.execCommand('insertHTML',false,html);}
+ if(kind==='link'){const u=document.getElementById('svLinkUrl').value.trim();const label=document.getElementById('svLinkText').value.trim()||u;if(!/^https?:\/\//i.test(u))return alert('पूरा http:// या https:// लिंक डालें');document.execCommand('insertHTML',false,`<p><a href="${escapeAttr(u)}" target="_blank" rel="noopener noreferrer">${escapeText(label)}</a></p>`);}
+}
+function svSaveRichTopic(){const i=+document.getElementById('svAdmTopic').value,n=document.getElementById('admTitle').value.trim();if(!n)return alert('Topic title लिखें');ALL[i].n=n;ALL[i].html=document.getElementById('svRichEditor').innerHTML;savedTopicEdits[i]={n,html:ALL[i].html};localStorage.setItem('sv_topic_edits',JSON.stringify(savedTopicEdits));svSaveAdminData();alert('Topic सेव हो गया। Firebase Sync पूरा होने दें।');adminPanel();}
+function svApplyTheme(){const p=document.getElementById('svThemeColor').value,b=document.getElementById('svBgColor').value;document.documentElement.style.setProperty('--primary',p);document.documentElement.style.setProperty('--bg',b);localStorage.setItem('sv_theme',JSON.stringify({p,b}));svSaveAdminData();alert('Theme लागू कर दी गई।');}
+
 function escapeAttr(v){return String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 function escapeText(v){return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function saveTopicEdit(i){let n=document.getElementById('admTitle').value.trim(),html=document.getElementById('admHtml').value;if(!n){alert('Topic title खाली नहीं हो सकता');return;}ALL[i].n=n;ALL[i].html=html;savedTopicEdits[i]={n,html};localStorage.setItem('sv_topic_edits',JSON.stringify(savedTopicEdits));alert('Topic save हो गया!');adminPanel();}
@@ -1866,7 +2345,9 @@ function chDone(c){let n=0;for(let i=c.start;i<c.start+c.count;i++)if(done.has(i
 
 function buildSb(){
  let h='<div class="chTabs">';
+ const activeBookId=CHAPTERS[chIdx]?.bookId||'copa';
  CHAPTERS.forEach((c,ci)=>{
+  if((c.bookId||'copa')!==activeBookId)return;
   h+=`<button class="chTab ${ci===chIdx?'on':''}" onclick="setCh(${ci})">${c.icon} ${c.name.replace(' — ','<br>')}</button>`;
  });
  h+='</div>';
@@ -1882,7 +2363,7 @@ function buildSb(){
  sb.innerHTML=h;
 }
 function setCh(ci){
- chIdx=ci;cur=CHAPTERS[ci].start;
+ chIdx=ci;svSelectedBookId=CHAPTERS[ci]?.bookId||'copa';cur=CHAPTERS[ci].start;
  document.getElementById('chTitle').innerHTML=`${CHAPTERS[ci].icon} COPA — ${CHAPTERS[ci].name}<span style="font-weight:400;font-size:14px;color:#dfe3ff"> (${CHAPTERS[ci].hi})</span>`;
  buildSb();render(cur);
 }
@@ -1890,9 +2371,12 @@ function setCh(ci){
 function updateProgress(){
  saveState();
  const c=CHAPTERS[chIdx];
- const n=chDone(c), pct=Math.round(n/c.count*100);
+ // Navigation progress follows the currently selected topic, not the count of visited topics.
+ const topicNo=Math.max(1,Math.min(c.count,cur-c.start+1));
+ const pct=Math.round(topicNo/c.count*100);
+ const visited=chDone(c);
  document.getElementById('pbar').style.width=pct+'%';
- document.getElementById('ptext').textContent=`${c.name}: पढ़ा हुआ ${n} / ${c.count} topics (${pct}%)`;
+ document.getElementById('ptext').textContent=`${c.name}: वर्तमान Topic ${topicNo} / ${c.count} (${pct}%) · देखे गए ${visited} topics`;
 }
 function highlightSb(){
  document.querySelectorAll('.sbItem').forEach(el=>el.classList.remove('active'));
@@ -1968,7 +2452,7 @@ function render(i){
 function notePlainText(html){const box=document.createElement('div');box.innerHTML=html;return (box.innerText||box.textContent||'').trim();}
 function downloadCurrentNote(i){
  const t=ALL[i];
- const doc=`<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeText(t.n)} - StudyVerse</title><style>body{font-family:Arial,'Noto Sans Devanagari',sans-serif;max-width:850px;margin:30px auto;padding:20px;line-height:1.7;color:#202536}h1{color:#4f46e5}img{max-width:100%}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:8px}</style></head><body><h1>${escapeText(t.n)}</h1><p><b>${escapeText(t.hi||'')}</b></p>${t.html}<hr><p>StudyVerse — COPA Smart Learning Platform</p></body></html>`;
+ const doc=`<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeText(t.n)} - StudyVerse</title><style>body{font-family:Arial,'Noto Sans Devanagari',sans-serif;max-width:850px;margin:30px auto;padding:20px;line-height:1.7;color:#202536}h1{color:#4f46e5}img{max-width:100%}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:8px}</style></head><body><h1>${escapeText(t.n)}</h1><p><b>${escapeText(t.hi||'')}</b></p>${t.html}<hr><p>ITI COPA · Study Material &amp; Practice</p></body></html>`;
  const blob=new Blob([doc],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=(t.n||'StudyVerse-Notes').replace(/[^a-z0-9\u0900-\u097f_-]+/gi,'_')+'.html';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
 }
 function buildPrintableDoc(title, sections){
@@ -2044,35 +2528,11 @@ function svAdminLogout(){
   if (typeof window.svSignOut === 'function') window.svSignOut();
 }
 function svSaveAdminData(){
-  localStorage.setItem('sv_admin_data',JSON.stringify({topics:ALL,chapters:CHAPTERS}));
+  localStorage.setItem('sv_admin_data',JSON.stringify({topics:ALL,chapters:CHAPTERS,books:SV_BOOKS}));
   localStorage.setItem('sv_topic_edits',JSON.stringify(savedTopicEdits));
 }
-(function restoreAdminData(){
-  try{
-    const raw=localStorage.getItem('sv_admin_data');
-    if(raw){
-      const data=JSON.parse(raw);
-      if(Array.isArray(data.topics)&&Array.isArray(data.chapters)&&data.chapters.length){
-        ALL.splice(0,ALL.length,...data.topics);
-        CHAPTERS.splice(0,CHAPTERS.length,...data.chapters);
-      }
-    }
-  }catch(e){console.warn('Saved Admin data could not be restored',e);}
-  // Migrate older local browser data: add the 10 new Chapter 1 lessons once.
-  try{
-    const c1=CHAPTERS[0];
-    if(c1 && c1.count===12){
-      const newLessons=CH1_TOPICS.slice(10,20);
-      ALL.splice(c1.start+10,0,...newLessons);
-      c1.count+=newLessons.length;
-      for(let ci=1;ci<CHAPTERS.length;ci++) CHAPTERS[ci].start+=newLessons.length;
-      c1.parts=[[0,"🟦 Part 1 — Trade Introduction"],[1,"🟩 Part 2 — Scope और Progression"],[3,"🟥 Part 3 — Safety Rules"],[5,"🟨 Part 4 — Safety Symbols और Fire"],[8,"🧯 Part 5 — Fire Classes और Extinguishers"],[10,"🏫 Part 6 — ITI और Training System"],[11,"🦺 Part 7 — PPE और First Aid"],[14,"🚨 Part 8 — Emergency और Ergonomics"],[16,"🧹 Part 9 — Housekeeping और Reporting"],[18,"♻️ Part 10 — Environment और Lab Behaviour"],[20,"🎯 Revision — Chapter Summary"]];
-      CHAPTERS[1].parts=[[21,"🟦 Part 1 — Computer की नींव (Basics)"],[30,"🟩 Part 2 — Computer के उपयोग (Uses)"],[31,"🟨 Part 3 — Input Devices (इनपुट डिवाइस)"],[43,"🟧 Part 4 — Output Devices (आउटपुट डिवाइस)"],[50,"🟪 Part 5 — Computer Memory (मेमोरी)"],[58,"🟥 Part 6 — Motherboard और Microprocessor"],[60,"🎯 Revision — Chapter Summary"]];
-      CHAPTERS[2].parts=[[61,"🟦 Part 1 — Software और उसका Classification"],[91,"🟧 Part 2 — Hardware/Software Issues और Solution"],[92,"🔓 Part 3 — Open Source Software"],[93,"🔌 Part 4 — Booting"],[94,"🎯 Revision — Chapter 3 Summary"]];
-      localStorage.setItem('sv_admin_data',JSON.stringify({topics:ALL,chapters:CHAPTERS}));
-    }
-  }catch(e){console.warn('StudyVerse Chapter 1 migration skipped',e);}
-})();
+// Final clean build: original COPA catalogue is the starting source of truth.
+// Temporary Book/Chapter additions from the previous testing build are not restored.
 function adminPanel(){
   if(!window.svIsAdmin){alert('Admin access नहीं है।');return;}
   dashboardMode=true;
@@ -2084,55 +2544,307 @@ function adminPanel(){
   const t=ALL[cur]||{n:'',hi:'',icon:'📘',html:'',quiz:[]};
   d.innerHTML=`
   <div class="card svAdminCard">
-    <div class="svAdminTop"><div><div class="svAdminBadge">🔐 PRIVATE ADMIN STUDIO</div><h2>StudyVerse Admin Panel</h2><p>Content Manager · WordPad-style Notes Editor</p></div><button class="svExitBtn" onclick="svAdminLogout()">Admin Logout</button></div>
-    <div class="svAdminNotice">Admin Mode सक्रिय है। नीचे से Chapter/Topic चुनें, Notes लिखें, Format करें और Save करें।</div>
-    <div class="svAdminGrid">
-      <section class="svAdminSection"><h3>📝 मौजूदा Topic Edit करें</h3>
-        <label>Chapter चुनें</label><select class="admInput" id="svAdmChapter" onchange="svLoadChapterTopics()">${chapterOptions}</select>
-        <label>Topic चुनें</label><select class="admInput" id="svAdmTopic" onchange="svLoadTopicIntoEditor()">${topicOptions}</select>
-        <label>Topic का नाम</label><input id="admTitle" class="admInput" value="${escapeAttr(t.n)}">
-        <label>छोटा परिचय / Hindi Title</label><input id="admHi" class="admInput" value="${escapeAttr(t.hi||'')}">
-        <label>Icon / Emoji</label><input id="admIcon" class="admInput" value="${escapeAttr(t.icon||'📘')}">
-        <div class="svEditorLabel">📄 Notes Editor — WordPad जैसी सुविधाएँ</div>
-        <div class="svToolbar">
-          <button onclick="svCmd('bold')" title="Bold"><b>B</b></button><button onclick="svCmd('italic')" title="Italic"><i>I</i></button><button onclick="svCmd('underline')" title="Underline"><u>U</u></button>
-          <select onchange="svFontSize(this.value);this.value=''" aria-label="Font size"><option value="">Size</option><option value="2">Small</option><option value="3">Normal</option><option value="4">Large</option><option value="5">Very Large</option><option value="6">Huge</option></select>
-          <input type="color" title="Text Color" onchange="svColor(this.value)" value="#202536">
-          <button onclick="svCmd('justifyLeft')">☰ Left</button><button onclick="svCmd('justifyCenter')">≡ Center</button><button onclick="svCmd('justifyRight')">☷ Right</button>
-          <button onclick="svCmd('insertUnorderedList')">• List</button><button onclick="svCmd('insertOrderedList')">1. List</button>
-          <button onclick="svInsertLink()">🔗 Link</button><button onclick="document.getElementById('svImageFile').click()">🖼️ Image</button>
-          <button onclick="svCmd('undo')">↶ Undo</button><button onclick="svCmd('redo')">↷ Redo</button>
-        </div>
-        <input type="file" id="svImageFile" accept="image/*" style="display:none" onchange="svInsertImage(this)">
-        <div id="svRichEditor" class="svRichEditor" contenteditable="true">${t.html||''}</div>
-        <div class="svEditorHelp">Editor में सीधे लिखें या ऊपर के बटन से Bold, रंग, Size, List, Link और Image जोड़ें।</div>
-        <div class="svActionRow"><button class="quizBtn" onclick="svSaveEditedTopic()">💾 Save Changes</button><button class="quizBtn" style="background:#64748b" onclick="showDashboard()">🏠 Dashboard</button><button class="quizBtn" style="background:#b91c1c" onclick="svDeleteTopic()">🗑️ Delete Topic</button></div>
-      </section>
-      <section class="svAdminSection"><h3>➕ नया Content जोड़ें</h3>
-        <label>किस Chapter में जोड़ना है?</label><select id="svNewChapter" class="admInput">${chapterOptions}</select>
-        <label>नए Topic का नाम</label><input id="svNewTitle" class="admInput" placeholder="जैसे: MS Word का परिचय">
-        <label>Topic का छोटा परिचय</label><input id="svNewHi" class="admInput" placeholder="जैसे: Word Processing Software">
-        <button class="quizBtn" onclick="svAddTopic()">➕ Add New Topic</button>
-        <hr class="svDivider">
-        <h3>📚 नया Chapter बनाएं</h3>
-        <label>Chapter का नाम</label><input id="svNewChapterName" class="admInput" placeholder="Chapter 4 — नया अध्याय">
-        <label>Hindi Description</label><input id="svNewChapterHi" class="admInput" placeholder="अध्याय का परिचय">
-        <button class="quizBtn" onclick="svAddChapter()">➕ Create Chapter</button>
-        <hr class="svDivider">
-        <h3>🧠 Quiz Question जोड़ें</h3>
-        <label>सवाल</label><textarea id="svQuizQ" class="admInput" rows="2" placeholder="अपना सवाल लिखें"></textarea>
-        <label>Option A</label><input id="svOpt0" class="admInput" placeholder="पहला विकल्प">
-        <label>Option B</label><input id="svOpt1" class="admInput" placeholder="दूसरा विकल्प">
-        <label>Option C</label><input id="svOpt2" class="admInput" placeholder="तीसरा विकल्प">
-        <label>Option D (वैकल्पिक)</label><input id="svOpt3" class="admInput" placeholder="चौथा विकल्प">
-        <label>सही जवाब</label><select id="svQuizAnswer" class="admInput"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select>
-        <button class="quizBtn" onclick="svAddQuiz()">➕ Add Quiz to Selected Topic</button>
-        <hr class="svDivider"><h3>📊 Content Summary</h3><p><b>${CHAPTERS.length}</b> Chapters · <b>${ALL.length}</b> Topics · ${done.size} Completed in this browser</p>
-        <button class="quizBtn" style="background:#0f766e" onclick="svExportBackup()">⬇️ Download Content Backup</button>
-      </section>
+    <div class="svAdminTop"><div><div class="svAdminBadge">🔐 PRIVATE ADMIN STUDIO</div><h2>Admin Dashboard</h2><p>Books, Chapters और Topics प्रबंधित करें</p></div><button class="svExitBtn" onclick="svAdminLogout()">Admin Logout</button></div>
+    <div class="svAdminNotice">Admin Mode सक्रिय है। सबसे पहले चुनें कि आप क्या जोड़ना या बदलना चाहते हैं।</div>
+    <div class="svQuickTitle">Admin Tools</div>
+    <div class="svQuickActions svActionMenu">
+      <button class="svQuickAction book" onclick="svShowAdminTool('book')"><span>📚</span><b>1. New Book</b><small>नई किताब जोड़ें और मैनेज करें</small></button>
+      <button class="svQuickAction chapter" onclick="svShowAdminTool('chapter')"><span>📖</span><b>2. New Chapter</b><small>किस Book में Chapter जोड़ना है चुनें</small></button>
+      <button class="svQuickAction topic" onclick="svShowAdminTool('topic')"><span>📝</span><b>3. New Topic</b><small>WordPad जैसे एडिटर से टॉपिक बनाएँ</small></button>
+      <button class="svQuickAction editTopic" onclick="svShowAdminTool('editTopic')"><span>✍️</span><b>Edit Topic</b><small>पुराने Topic को बदलें</small></button>
+      <button class="svQuickAction theme" onclick="svShowAdminTool('theme')"><span>🎨</span><b>4. Website Colors</b><small>पूरी वेबसाइट की थीम बदलें</small></button>
+      <button class="svQuickAction deleteTopic" onclick="svShowAdminTool('deleteTopic')"><span>🗑️</span><b>5. Delete Topic</b><small>Chapter के अंदर का Topic हटाएँ</small></button>
+      <button class="svQuickAction deleteChapter" onclick="svShowAdminTool('deleteChapter')"><span>📕</span><b>6. Delete Chapter</b><small>चुना हुआ Chapter हटाएँ</small></button>
+      <button class="svQuickAction editChapter" onclick="svShowAdminTool('editChapter')"><span>✏️</span><b>7. Edit Old Chapter</b><small>पुराने Chapter का नाम और विवरण बदलें</small></button>
+    </div>
+    <div id="svAdminToolPanels" class="svAdminToolPanels">
+      <div class="svToolWelcome"><b>किस काम से शुरुआत करेंगे?</b><p>किसी सुविधा को चुनें। उसके विकल्प यहीं खुलेंगे।</p></div>
+    </div>
+    <div class="svAdminSummary">
+      <b>📊 Content Summary</b>
+      <p>${CHAPTERS.length} Chapters · ${ALL.length} Topics · ${SV_BOOKS.length} Books</p>
+      <button class="quizBtn" style="background:#0f766e" onclick="svExportBackup()">⬇️ Download Content Backup</button>
     </div>
   </div>`;
   window.scrollTo(0,0);
+}
+
+
+
+const SV_TOPIC_SECTIONS = [
+ ['heading','🅷 Heading','Heading / टॉपिक का नाम'],
+ ['definition','📘 Definition Box','सरल परिभाषा'],
+ ['example','💡 Real Life Example Box','रियल लाइफ उदाहरण'],
+ ['points','📋 Table / List','मुख्य पॉइंट्स या अंतर'],
+ ['remember','⭐ Remember Box','एग्जाम के लिए पक्की ट्रिक'],
+ ['media','🎬 Media Link','वीडियो, लिंक और डाउनलोड']
+];
+function svRichToolbar(target){
+ return `<div class="svToolbar" data-editor-toolbar="${target}">
+  <button type="button" onmousedown="event.preventDefault()" onclick="svFmt('${target}','bold')"><b>B</b></button>
+  <button type="button" onmousedown="event.preventDefault()" onclick="svFmt('${target}','italic')"><i>I</i></button>
+  <button type="button" onmousedown="event.preventDefault()" onclick="svFmt('${target}','underline')"><u>U</u></button>
+  <button type="button" onclick="svFmt('${target}','insertUnorderedList')">• List</button>
+  <button type="button" onclick="svFmt('${target}','insertOrderedList')">1. List</button>
+  <button type="button" onclick="svFmt('${target}','justifyLeft')">⇤</button>
+  <button type="button" onclick="svFmt('${target}','justifyCenter')">↔</button>
+  <button type="button" onclick="svFmt('${target}','justifyRight')">⇥</button>
+  <select onchange="svFmtBlock('${target}',this.value);this.selectedIndex=0"><option value="">Text Style</option><option value="h1">Title</option><option value="h2">Heading</option><option value="h3">Subheading</option><option value="p">Paragraph</option></select>
+  <label class="svFontColor">A <input type="color" onchange="svFmtColor('${target}',this.value)"></label>
+  <button type="button" onclick="svFmtLink('${target}')">🔗 Link</button>
+  <button type="button" onclick="svFmt('','removeFormat')">Clear format</button>
+ </div>`;
+}
+function svFmt(id,cmd){
+ const el=id?document.getElementById(id):document.activeElement;
+ if(el?.isContentEditable)el.focus();
+ document.execCommand(cmd,false,null);
+}
+function svFmtBlock(id,tag){document.getElementById(id)?.focus();document.execCommand('formatBlock',false,tag);}
+function svFmtColor(id,color){document.getElementById(id)?.focus();document.execCommand('foreColor',false,color);}
+function svFmtLink(id){const url=prompt('पूरा Link URL डालें (https://...)');if(url){document.getElementById(id)?.focus();document.execCommand('createLink',false,url);}}
+function svEscapeHTML(x){return String(x||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function svOpenTopicSection(key){
+ const id='svNewSec_'+key, el=document.getElementById(id);
+ if(!el)return;
+ document.querySelectorAll('#svNewTopicSections .svSectionCard').forEach(card=>card.classList.remove('active'));
+ const card=el.closest('.svSectionCard');
+ card?.classList.add('active');
+ card?.scrollIntoView({behavior:'smooth',block:'center'});
+ el.focus();
+}
+function svTopicSectionMarkup(key,title,placeholder,initial=''){
+ const id='svNewSec_'+key;
+ return `<section class="svSectionCard" id="svCard_${key}">
+  <button type="button" class="svSectionOpen" onclick="svOpenTopicSection('${key}')">${title} <span>✎ Edit / लिखें</span></button>
+  ${svRichToolbar(id)}
+  <div id="${id}" class="svRichEditor svSectionEditor" contenteditable="true" data-section="${key}" data-placeholder="${placeholder}">${initial}</div>
+ </section>`;
+}
+function svMediaMarkup(prefix,vals={}){
+ return `<section class="svSectionCard"><h4>🎬 Media Link</h4>
+  <label>Image URL</label><input id="${prefix}Image" class="admInput" value="${svEscapeHTML(vals.image||'')}" placeholder="https://...">
+  <label>Video / YouTube URL</label><input id="${prefix}Video" class="admInput" value="${svEscapeHTML(vals.video||'')}" placeholder="https://youtube.com/...">
+  <label>External Link / PDF URL</label><input id="${prefix}Link" class="admInput" value="${svEscapeHTML(vals.link||'')}" placeholder="https://...">
+  <label>Link का नाम</label><input id="${prefix}LinkName" class="admInput" value="${svEscapeHTML(vals.linkName||'लिंक खोलें')}">
+  <label>Download URL</label><input id="${prefix}Download" class="admInput" value="${svEscapeHTML(vals.download||'')}" placeholder="https://...">
+ </section>`;
+}
+function svQuizMarkup(prefix,quiz=[]){
+ return `<section class="svSectionCard"><h4>🎯 Quiz — 1 से 5 सवाल तक (जितने चाहें)</h4>
+ ${[0,1,2,3,4].map(i=>{const q=quiz[i]||{q:'',o:['','','',''],a:0};return `<div class="svQuizEditor">
+  <b>Question ${i+1} (खाली छोड़ सकते हैं)</b>
+  <input id="${prefix}Q${i}" class="admInput" value="${svEscapeHTML(q.q)}" placeholder="सवाल">
+  ${[0,1,2,3].map(j=>`<input id="${prefix}Q${i}O${j}" class="admInput" value="${svEscapeHTML(q.o?.[j]||'')}" placeholder="विकल्प ${String.fromCharCode(65+j)}">`).join('')}
+  <label>सही जवाब चुनें ✓</label><select id="${prefix}Q${i}A" class="admInput">${[0,1,2,3].map(j=>`<option value="${j}" ${+(q.a||0)===j?'selected':''}>✓ ${String.fromCharCode(65+j)}</option>`).join('')}</select>
+ </div>`}).join('')}</section>`;
+}
+function svCollectQuiz(prefix){
+ const out=[];
+ for(let i=0;i<5;i++){
+  const q=document.getElementById(`${prefix}Q${i}`)?.value.trim()||'';
+  const raw=[0,1,2,3].map(j=>document.getElementById(`${prefix}Q${i}O${j}`)?.value.trim()||'');
+  const opts=raw.filter(Boolean);
+  if(!q&&!opts.length)continue;
+  if(!q||opts.length<2){alert(`Quiz ${i+1}: सवाल और कम से कम 2 विकल्प भरें, या पूरा खाली छोड़ें।`);return null;}
+  const selected=+(document.getElementById(`${prefix}Q${i}A`)?.value||0);
+  if(!raw[selected]){alert(`Quiz ${i+1}: जिस विकल्प को सही चुना है, उसे भरें।`);return null;}
+  out.push({q,o:raw.filter(Boolean),a:raw.slice(0,selected+1).filter(Boolean).length-1});
+ }
+ return out;
+}
+function svCollectMedia(prefix){
+ const val=id=>document.getElementById(prefix+id)?.value.trim()||'';
+ return {image:val('Image'),video:val('Video'),link:val('Link'),linkName:val('LinkName')||'लिंक खोलें',download:val('Download')};
+}
+function svBuildTopicHTML(prefix){
+ let html='';
+ for(const [key,title] of SV_TOPIC_SECTIONS){
+  if(key==='media')continue;
+  const el=document.getElementById(prefix+'Sec_'+key);
+  const content=el?.innerHTML.trim()||'';
+  if(!content)continue;
+  const cls={heading:'svTopicHeading',definition:'svDefinitionBox',example:'svExampleBox',points:'svPointsBox',remember:'svRememberBox'}[key];
+  html+=`<section class="${cls}">${content}</section>`;
+ }
+ const m=svCollectMedia(prefix);
+ if(m.image)html+=`<img src="${svEscapeHTML(m.image)}" alt="" style="max-width:100%;border-radius:12px">`;
+ if(m.video){
+  const yt=m.video.match(/(?:youtu\.be\/|v=|embed\/)([A-Za-z0-9_-]{6,})/);
+  html+=yt?`<div class="svMediaBox"><iframe width="100%" height="315" src="https://www.youtube-nocookie.com/embed/${yt[1]}" allowfullscreen loading="lazy"></iframe></div>`:`<div class="svMediaBox"><a href="${svEscapeHTML(m.video)}" target="_blank" rel="noopener noreferrer">▶ Video खोलें</a></div>`;
+ }
+ if(m.link)html+=`<div class="svMediaBox"><a href="${svEscapeHTML(m.link)}" target="_blank" rel="noopener noreferrer">${svEscapeHTML(m.linkName)}</a></div>`;
+ if(m.download)html+=`<div class="svMediaBox"><a class="svDownloadLink" href="${svEscapeHTML(m.download)}" target="_blank" rel="noopener noreferrer" download>⬇️ Download</a></div>`;
+ return html;
+}
+function svSaveStructuredTopic(){
+ const ci=+(document.getElementById('svNewChapter')?.value||0),c=CHAPTERS[ci];
+ if(!c)return alert('पहले Chapter चुनें।');
+ const name=document.getElementById('svNewSec_heading')?.innerText.trim()||document.getElementById('svNewTitle')?.value.trim()||'';
+ if(!name)return alert('Heading में Topic का नाम लिखें।');
+ const quiz=svCollectQuiz('svNew');if(quiz===null)return;
+ const html=svBuildTopicHTML('svNew');
+ const at=c.start+c.count;
+ ALL.splice(at,0,{n:name,hi:'',icon:'📘',html,quiz});
+ c.count++;CHAPTERS.forEach((x,i)=>{if(i>ci)x.start++;});
+ svSaveAdminData();chIdx=ci;cur=at;buildSb();alert('Topic सेव हो गया।');adminPanel();
+}
+function svRefreshEditTopicChapters(){
+ const bookId=document.getElementById('svEditTopicBook')?.value;
+ const sel=document.getElementById('svEditTopicChapter');if(!sel)return;
+ const arr=CHAPTERS.map((c,i)=>({c,i})).filter(x=>(x.c.bookId||'copa')===bookId);
+ sel.innerHTML=arr.map(x=>`<option value="${x.i}">${svEscapeHTML(x.c.name)}</option>`).join('');
+ svRefreshEditTopicList();
+}
+function svRefreshEditTopicList(){
+ const ci=+(document.getElementById('svEditTopicChapter')?.value||0),c=CHAPTERS[ci];
+ const sel=document.getElementById('svEditTopicSelect');if(!c||!sel)return;
+ sel.innerHTML=Array.from({length:c.count},(_,k)=>{const i=c.start+k;return `<option value="${i}">${svEscapeHTML(ALL[i]?.n||'Topic')}</option>`}).join('');
+ svLoadTopicForEdit();
+}
+function svLoadTopicForEdit(){
+ const i=+(document.getElementById('svEditTopicSelect')?.value||0),t=ALL[i];if(!t)return;
+ const host=document.getElementById('svEditTopicFields');if(!host)return;
+ host.innerHTML=`<label>Topic का नाम</label><input id="svEditName" class="admInput" value="${svEscapeHTML(t.n)}">
+ <section class="svSectionCard"><h4>🖋️ Full MS Word-style Editor</h4>${svRichToolbar('svEditContent')}<div id="svEditContent" class="svRichEditor" contenteditable="true">${t.html||''}</div><p class="svEditorHelp">यहाँ पुराने Topic का पूरा content है। टेक्स्ट चुनकर Bold, Italic, रंग, Heading, List और Link लगा सकते हैं।</p></section>
+ ${svQuizMarkup('svEdit',t.quiz||[])}
+ <button class="quizBtn" onclick="svSaveTopicFullEdit()">💾 Save Topic Changes</button>`;
+}
+function svSaveTopicFullEdit(){
+ const i=+(document.getElementById('svEditTopicSelect')?.value||0),t=ALL[i];if(!t)return;
+ const n=document.getElementById('svEditName')?.value.trim();if(!n)return alert('Topic का नाम जरूरी है।');
+ const quiz=svCollectQuiz('svEdit');if(quiz===null)return;
+ t.n=n;t.html=document.getElementById('svEditContent')?.innerHTML||'';t.quiz=quiz;
+ svSaveAdminData();buildSb();alert('Topic अपडेट हो गया।');svLoadTopicForEdit();
+}
+function svApplyFullTheme(){
+ const ids={primary:'svThemeColor',accent:'svThemeColor2',bg:'svBgColor',card:'svCardColor',text:'svTextColor',header:'svHeaderColor',sidebar:'svSidebarColor',link:'svLinkColor',ok:'svSuccessColor',warning:'svWarningColor'};
+ Object.entries(ids).forEach(([k,id])=>{const v=document.getElementById(id)?.value;if(v)document.documentElement.style.setProperty('--'+k,v);});
+ document.documentElement.style.setProperty('--card-radius',(document.getElementById('svCardRound')?.value||16)+'px');
+ if(document.getElementById('svThemePreset')?.value==='dark'){document.documentElement.style.setProperty('--bg','#111827');document.documentElement.style.setProperty('--card','#1f2937');document.documentElement.style.setProperty('--text','#f9fafb');}
+ alert('रंग बदल गए।');
+}
+function svResetFullTheme(){['primary','accent','bg','card','text','header','sidebar','link','ok','warning','card-radius'].forEach(k=>document.documentElement.style.removeProperty('--'+k));alert('Default colors वापस आ गए।');}
+function svShowAdminTool(which){
+ const host=document.getElementById('svAdminToolPanels'); if(!host)return;
+ const books=SV_BOOKS.map((b,i)=>`<option value="${i}">${escapeText(b.icon||'📚')} ${escapeText(b.title)}</option>`).join('');
+ const bookIdOptions=SV_BOOKS.map(b=>`<option value="${svEscapeHTML(b.id)}">${escapeText(b.icon||'📚')} ${escapeText(b.title)}</option>`).join('');
+ const chapters=CHAPTERS.map((c,i)=>`<option value="${i}">${escapeText(c.name)}</option>`).join('');
+ const topicOpts=ALL.map((t,i)=>`<option value="${i}">${i+1}. ${escapeText(t.n)}</option>`).join('');
+ const box=(title,body)=>`<section class="svToolPanel"><h3>${title}</h3>${body}</section>`;
+ let out='';
+ if(which==='book') out=box('📚 New Book',`
+  <label>Book का नाम</label><input id="svNewBookTitle" class="admInput" placeholder="जैसे: Computer Fundamentals">
+  <label>विवरण</label><input id="svNewBookDesc" class="admInput" placeholder="किताब का छोटा परिचय">
+  <label>Icon / Emoji</label><input id="svNewBookIcon" class="admInput" value="📘" maxlength="8">
+  <button class="quizBtn" onclick="svAddBook()">➕ Add Book</button>
+  <hr><b>मौजूदा Books</b><div class="svBookAdminList">${SV_BOOKS.map(b=>`<div><b>${escapeText(b.icon||'📚')} ${escapeText(b.title)}</b><small>${escapeText(b.description||'')}</small></div>`).join('')}</div>`);
+ if(which==='chapter') out=box('📖 New Chapter',`
+  <label>किस Book में Chapter जोड़ना है?</label><select id="svNewChapterBook" class="admInput">${books}</select>
+  <label>Chapter का नाम</label><input id="svNewChapterName" class="admInput" placeholder="Chapter का नाम">
+  <label>Chapter का विवरण</label><input id="svNewChapterHi" class="admInput" placeholder="अध्याय का परिचय">
+  <button class="quizBtn" onclick="svAddChapter()">➕ Add Chapter</button>
+  <p class="svEditorHelp">नोट: मौजूदा COPA के chapters पुराने chapter data में हैं। नई custom books के लिए अलग chapter collection अगली संरचनात्मक स्टेज में जोड़ना होगा।</p>`);
+ if(which==='topic') out=box('📝 New Topic — हर सेक्शन वहीं खुलेगा',`
+  <label>Book चुनें</label><select id="svTopicBook" class="admInput" onchange="svRefreshNewTopicChapters()">${bookIdOptions}</select>
+  <label>Chapter चुनें</label><select id="svNewChapter" class="admInput"></select>
+  <p class="svEditorHelp">किसी सेक्शन के बटन पर क्लिक करें। उसका MS Word जैसा एडिटर उसी सेक्शन के नीचे खुलेगा। कोई भी सेक्शन या Quiz खाली छोड़ सकते हैं।</p>
+  <div class="svSectionLaunchers">
+   ${SV_TOPIC_SECTIONS.map(x=>`<button type="button" onclick="svOpenTopicSection('${x[0]}')">${x[1]}</button>`).join('')}
+   <button type="button" onclick="document.getElementById('svNewQuizArea').scrollIntoView({behavior:'smooth'})">🎯 Quiz (1–5)</button>
+  </div>
+  <div id="svNewTopicSections">
+   ${SV_TOPIC_SECTIONS.filter(x=>x[0]!=='media').map(x=>svTopicSectionMarkup(x[0],x[1],x[2])).join('')}
+   ${svMediaMarkup('svNew')}
+  </div>
+  <div id="svNewQuizArea">${svQuizMarkup('svNew')}</div>
+  <button class="quizBtn" onclick="svSaveStructuredTopic()">💾 Save Topic</button>`);
+ if(which==='editTopic') out=box('✍️ Edit Topic — Book और Chapter चुनें',`
+  <label>Book चुनें</label><select id="svEditTopicBook" class="admInput" onchange="svRefreshEditTopicChapters()">${bookIdOptions}</select>
+  <label>Chapter चुनें</label><select id="svEditTopicChapter" class="admInput" onchange="svRefreshEditTopicList()"></select>
+  <label>कौन-सा Topic Edit करना है?</label><select id="svEditTopicSelect" class="admInput" onchange="svLoadTopicForEdit()"></select>
+  <div id="svEditTopicFields"></div>`);
+ if(which==='theme') out=box('🎨 Full Website Color Customizer',`
+  <div class="svColorGrid">
+   <label>Primary / Buttons <input type="color" id="svThemeColor" value="#4f46e5"></label>
+   <label>Accent <input type="color" id="svThemeColor2" value="#7c6cf6"></label>
+   <label>Page Background <input type="color" id="svBgColor" value="#f1f3f9"></label>
+   <label>Cards <input type="color" id="svCardColor" value="#ffffff"></label>
+   <label>Text <input type="color" id="svTextColor" value="#202536"></label>
+   <label>Header <input type="color" id="svHeaderColor" value="#171b35"></label>
+   <label>Sidebar <input type="color" id="svSidebarColor" value="#202744"></label>
+   <label>Links <input type="color" id="svLinkColor" value="#2563eb"></label>
+   <label>Correct / Success <input type="color" id="svSuccessColor" value="#16a34a"></label>
+   <label>Remember / Warning <input type="color" id="svWarningColor" value="#f59e0b"></label>
+  </div>
+  <label>Card Roundness</label><input type="range" id="svCardRound" min="4" max="28" value="16">
+  <label>Theme Preset</label><select id="svThemePreset" class="admInput"><option value="soft">Soft Colorful</option><option value="vivid">Bright Colorful</option><option value="dark">Dark Mode</option></select>
+  <button class="quizBtn" onclick="svApplyFullTheme()">🎨 Apply All Colors</button>
+  <button class="quizBtn" onclick="svResetFullTheme()">↩️ Reset</button>`);
+ if(which==='deleteTopic') out=box('🗑️ Delete Topic',`
+  <label>Chapter चुनें</label><select id="svAdmChapter" class="admInput" onchange="svLoadChapterTopics()">${chapters}</select>
+  <label>Topic चुनें</label><select id="svAdmTopic" class="admInput">${topicOpts}</select>
+  <button class="quizBtn" style="background:#b91c1c" onclick="svDeleteTopic()">🗑️ Delete Selected Topic</button>`);
+ if(which==='deleteChapter') out=box('📕 Delete Chapter',`
+  <label>Book चुनें</label><select id="svDeleteChapterBook" class="admInput">${books}</select>
+  <label>Chapter चुनें</label><select id="svDeleteChapterSelect" class="admInput">${chapters}</select>
+  <p class="svEditorHelp">Chapter हटाने से उसके सभी Topics भी हट सकते हैं। पहले Backup डाउनलोड कर लें।</p>
+  <button class="quizBtn" style="background:#b91c1c" onclick="svDeleteChapter()">🗑️ Delete Selected Chapter</button>`);
+ if(which==='editChapter') out=box('✏️ Edit Old Chapter',`
+  <label>Chapter चुनें</label><select id="svEditChapterSelect" class="admInput" onchange="svLoadChapterForEdit()">${chapters}</select>
+  <label>Chapter का नाम</label><input id="svEditChapterName" class="admInput">
+  <label>Chapter का विवरण</label><input id="svEditChapterHi" class="admInput">
+  <button class="quizBtn" onclick="svSaveChapterEdit()">💾 Save Chapter Changes</button>`);
+ host.innerHTML=out+`<button class="quizBtn svCloseTool" onclick="document.getElementById('svAdminToolPanels').innerHTML='<div class=&quot;svToolWelcome&quot;>ऊपर से कोई Admin विकल्प चुनें।</div>'">✕ Close</button>`;
+ if(which==='editChapter')svLoadChapterForEdit();
+ if(which==='topic')svRefreshNewTopicChapters();
+ if(which==='editTopic')svRefreshEditTopicChapters();
+}
+
+function svRefreshNewTopicChapters(){
+ const bookId=document.getElementById('svTopicBook')?.value,sel=document.getElementById('svNewChapter');if(!sel)return;
+ const arr=CHAPTERS.map((c,i)=>({c,i})).filter(x=>(x.c.bookId||'copa')===bookId);
+ sel.innerHTML=arr.map(x=>`<option value="${x.i}">${svEscapeHTML(x.c.name)}</option>`).join('');
+ if(!arr.length)sel.innerHTML='<option value="">इस Book में अभी Chapter नहीं है</option>';
+}
+function svRefreshTopicChapters(){
+ const sel=document.getElementById('svNewChapter'); if(!sel)return;
+ const opts=CHAPTERS.map((c,i)=>`<option value="${i}">${escapeText(c.name)}</option>`).join('');
+ sel.innerHTML=opts;
+}
+function svLoadChapterForEdit(){
+ const i=+(document.getElementById('svEditChapterSelect')?.value||0),c=CHAPTERS[i];if(!c)return;
+ document.getElementById('svEditChapterName').value=c.name||'';
+ document.getElementById('svEditChapterHi').value=c.hi||'';
+}
+function svSaveChapterEdit(){
+ const i=+document.getElementById('svEditChapterSelect').value,c=CHAPTERS[i];if(!c)return;
+ const n=document.getElementById('svEditChapterName').value.trim();if(!n)return alert('Chapter का नाम लिखें।');
+ c.name=n;c.hi=document.getElementById('svEditChapterHi').value.trim();svSaveAdminData();buildSb();alert('Chapter अपडेट हो गया।');svShowAdminTool('editChapter');
+}
+function svDeleteChapter(){
+ const i=+document.getElementById('svDeleteChapterSelect').value,c=CHAPTERS[i];if(!c)return;
+ if(!confirm(`"${c.name}" और उसके ${c.count} Topics हटाने हैं? पहले Backup जरूर रखें।`))return;
+ ALL.splice(c.start,c.count);CHAPTERS.splice(i,1);
+ let offset=0;for(let j=0;j<CHAPTERS.length;j++){CHAPTERS[j].start=offset;offset+=CHAPTERS[j].count;}
+ done.clear();answered.clear();svSaveAdminData();buildSb();alert('Chapter हट गया।');adminPanel();
+}
+function svAdminGo(id){
+ const el=document.getElementById(id);
+ if(!el)return;
+ el.scrollIntoView({behavior:'smooth',block:'center'});
+ const first=el.querySelector('input,select,button');
+ if(first)setTimeout(()=>first.focus({preventScroll:true}),350);
+}
+function svApplyDemoTheme(){
+ const p=document.getElementById('svThemeColor').value;
+ const b=document.getElementById('svBgColor').value;
+ const p2=document.getElementById('svThemeColor2').value;
+ document.documentElement.style.setProperty('--primary',p);
+ document.documentElement.style.setProperty('--primary2',p2);
+ document.documentElement.style.setProperty('--bg',b);
+ localStorage.setItem('sv_theme',JSON.stringify({p,p2,b}));
+ alert('Home Page की Demo Theme लागू हो गई।');
 }
 function svCmd(cmd){document.getElementById('svRichEditor')?.focus();document.execCommand(cmd,false,null);}
 function svFontSize(size){if(size){document.getElementById('svRichEditor')?.focus();document.execCommand('fontSize',false,size);}}
@@ -2161,20 +2873,49 @@ function svSaveEditedTopic(){
  t.n=n;t.hi=document.getElementById('admHi').value.trim();t.icon=document.getElementById('admIcon').value.trim()||'📘';t.html=document.getElementById('svRichEditor').innerHTML;
  savedTopicEdits[i]={n:t.n,hi:t.hi,icon:t.icon,html:t.html};svSaveAdminData();buildSb();alert('Topic और Notes Save हो गए।');adminPanel();
 }
+function svAddBook(){
+ const title=document.getElementById('svNewBookTitle').value.trim();
+ const description=document.getElementById('svNewBookDesc').value.trim();
+ const icon=document.getElementById('svNewBookIcon').value.trim()||'📘';
+ if(!title){alert('पहले Book का नाम लिखें।');return;}
+ if(SV_BOOKS.some(b=>b.title.toLowerCase()===title.toLowerCase())){alert('इस नाम की Book पहले से मौजूद है।');return;}
+ SV_BOOKS.push({id:'book_'+Date.now(),title,description,icon,kind:'custom',chapterCount:0,chapters:[]});
+ svSaveBooks();svSaveAdminData();alert('नई Book जुड़ गई। अब इसमें Chapter structure जोड़ने का अगला चरण बनाएँगे।');adminPanel();
+}
 function svAddTopic(){
  const ci=+document.getElementById('svNewChapter').value,c=CHAPTERS[ci];
+ if(!c)return alert('पहले Chapter चुनें।');
  const n=document.getElementById('svNewTitle').value.trim();if(!n){alert('पहले Topic का नाम लिखें।');return;}
- const topic={n,hi:document.getElementById('svNewHi').value.trim(),icon:'📘',html:'<p>यहाँ Admin Notes जोड़ें।</p>',quiz:[]};
+ const def=document.getElementById('svDefBox')?.value.trim()||'';
+ const ex=document.getElementById('svExBox')?.value.trim()||'';
+ const points=document.getElementById('svPointsBox')?.value.trim()||'';
+ const remember=document.getElementById('svRememberBox')?.value.trim()||'';
+ const media=document.getElementById('svMediaUrl')?.value.trim()||'';
+ const mediaLabel=document.getElementById('svMediaLabel')?.value.trim()||'Media Link';
+ const downloadText=document.getElementById('svDownloadText')?.value.trim()||'डाउनलोड करें';
+ const extra=document.getElementById('svRichEditor')?.innerHTML||'';
+ const esc=x=>String(x).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+ let body=`<h2>${esc(n)}</h2>`;
+ if(def)body+=`<div class="svDefinitionBox"><b>📘 सरल परिभाषा</b><p>${esc(def).replace(/\n/g,'<br>')}</p></div>`;
+ if(ex)body+=`<div class="svExampleBox"><b>💡 Real Life Example</b><p>${esc(ex).replace(/\n/g,'<br>')}</p></div>`;
+ if(points)body+=`<div class="svPointsBox"><b>📋 मुख्य पॉइंट्स</b><ul>${points.split(/\n/).filter(Boolean).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`;
+ if(remember)body+=`<div class="svRememberBox"><b>⭐ Exam Remember</b><p>${esc(remember).replace(/\n/g,'<br>')}</p></div>`;
+ if(extra.trim())body+=`<div class="svExtraNotes">${extra}</div>`;
+ if(media){const safe=esc(media);body+=`<div class="svMediaBox"><a href="${safe}" target="_blank" rel="noopener noreferrer">${esc(mediaLabel)}</a> <a class="svDownloadLink" href="${safe}" target="_blank" rel="noopener noreferrer" download>${esc(downloadText)}</a></div>`;}
+ const topic={n,hi:'',icon:'📘',html:body,quiz:[]};
  const at=c.start+c.count;ALL.splice(at,0,topic);c.count++;
  CHAPTERS.forEach((x,i)=>{if(i>ci)x.start++;});
- c.parts=c.parts||[];if(!c.parts.length)c.parts=[[at,'🟦 Topics']]; 
- savedTopicEdits={};localStorage.setItem('sv_topic_edits','{}');svSaveAdminData();chIdx=ci;cur=at;buildSb();alert('नया Topic जुड़ गया। अब इसे Admin Editor में खोलकर Notes लिखें।');adminPanel();
+ c.parts=c.parts||[];if(!c.parts.length)c.parts=[[at,'🟦 Topics']];
+ svSaveAdminData();chIdx=ci;cur=at;buildSb();alert('नया Topic सेव हो गया।');adminPanel();
 }
 function svAddChapter(){
  const name=document.getElementById('svNewChapterName').value.trim();if(!name){alert('Chapter का नाम लिखें।');return;}
  const hi=document.getElementById('svNewChapterHi').value.trim();
- CHAPTERS.push({name,hi,start:ALL.length,count:0,icon:'📙',parts:[]});
- svSaveAdminData();alert('नया Chapter बन गया। अब उसमें Topic जोड़ें।');adminPanel();
+ const bookIndex=+(document.getElementById('svNewChapterBook')?.value||0);
+ const book=SV_BOOKS[bookIndex];
+ CHAPTERS.push({name,hi,start:ALL.length,count:0,icon:'📙',bookId:book?.id||'copa',parts:[]});
+ if(book){book.chapterCount=(book.chapterCount||0)+1;book.chapters=book.chapters||[];book.chapters.push(name);svSaveBooks();}
+ svSaveAdminData();alert(`"${name}" Chapter बन गया${book?' — '+book.title:''}।`);adminPanel();
 }
 function svDeleteTopic(){
  const i=+document.getElementById('svAdmTopic').value,c=CHAPTERS[chIdx];
@@ -2195,10 +2936,52 @@ function svExportBackup(){
  const blob=new Blob([JSON.stringify({topics:ALL,chapters:CHAPTERS},null,2)],{type:'application/json'});
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='StudyVerse_Content_Backup.json';a.click();URL.revokeObjectURL(a.href);
 }
+
+
+const svAdminV3Css=document.createElement('style');
+svAdminV3Css.textContent=`
+.svQuickAction.editTopic{background:linear-gradient(135deg,#f5f3ff,#ddd6fe);color:#4c1d95}
+.svSectionLaunchers{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;margin:18px 0}
+.svSectionLaunchers button{border:0;border-radius:12px;padding:14px;background:linear-gradient(135deg,#eef2ff,#dbeafe);color:#243b70;font-weight:800;text-align:left}
+.svSectionLaunchers button:nth-child(3n+2){background:linear-gradient(135deg,#ecfdf5,#bbf7d0);color:#166534}
+.svSectionLaunchers button:nth-child(3n){background:linear-gradient(135deg,#fff7ed,#fed7aa);color:#9a3412}
+.svTopicSectionEditor{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--card);margin:12px 0}
+.svQuizEditor{padding:14px;border:1px solid var(--line);border-radius:12px;margin:12px 0;background:rgba(120,130,160,.06)}
+.svColorGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.svColorGrid label{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.svColorGrid input[type=color]{width:45px;height:38px;border:0;background:none}
+.svAdminToolPanels .svRichEditor{min-height:220px;padding:16px;border:1px solid var(--line);border-radius:10px;background:#fff;color:#202536}
+`;
+document.head.appendChild(svAdminV3Css);
+const svAdminExtraCss=document.createElement('style');
+svAdminExtraCss.textContent=`
+.svActionMenu{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.svQuickAction.deleteTopic{background:linear-gradient(135deg,#fff1f2,#fecdd3);color:#881337}
+.svQuickAction.deleteChapter{background:linear-gradient(135deg,#fff7ed,#fed7aa);color:#9a3412}
+.svQuickAction.editChapter{background:linear-gradient(135deg,#eff6ff,#bfdbfe);color:#1e40af}
+.svAdminToolPanels{margin:18px 0}
+.svToolWelcome,.svToolPanel{background:var(--card,#fff);border:1px solid var(--line);border-radius:16px;padding:18px;margin:12px 0}
+.svToolPanel{box-shadow:0 8px 24px rgba(20,30,60,.06)}
+.svToolPanel h3{margin-top:0;color:var(--primary)}
+.svToolPanel label{display:block;margin:12px 0 5px;font-weight:700}
+.svToolPanel hr{margin:18px 0;border:0;border-top:1px solid var(--line)}
+.svCloseTool{background:#64748b!important;margin-top:8px}
+.svAdminSummary{padding:16px;border:1px solid var(--line);border-radius:14px;margin-top:18px}
+.svDefinitionBox,.svExampleBox,.svPointsBox,.svRememberBox,.svMediaBox{padding:14px;border-radius:12px;margin:12px 0}
+.svDefinitionBox{background:#eff6ff;border-left:5px solid #3b82f6}
+.svExampleBox{background:#ecfdf5;border-left:5px solid #10b981}
+.svPointsBox{background:#fff7ed;border-left:5px solid #f59e0b}
+.svRememberBox{background:#fdf2f8;border-left:5px solid #db2777}
+.svMediaBox{background:#f1f5f9;border-left:5px solid #64748b}
+.svDownloadLink{display:inline-block;margin-left:10px;padding:6px 10px;border-radius:8px;background:var(--primary);color:white}
+`;
+document.head.appendChild(svAdminExtraCss);
 const svAdminCss=document.createElement('style');
 svAdminCss.textContent=`
 #adminButton{background:#f5b72f!important;color:#3b2a00!important;border:2px solid #ffe08a!important;font-weight:900!important;box-shadow:0 0 0 3px rgba(245,183,47,.18)}
-.svAdminCard{border:2px solid #f0b429;box-shadow:0 8px 28px rgba(120,80,0,.12)}
+#googleLaterButton{opacity:.72;cursor:not-allowed!important;font-size:11px!important}
+..svBookGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:10px 0 18px}.svBookCard{border:1px solid var(--line);padding:16px}.svBookCard h3{margin:8px 0;color:var(--primary)}.svBookCard p{color:var(--muted)}.svComingSoon{display:inline-block;margin-top:8px;color:var(--muted);font-size:13px}.svBookAdminList{display:grid;gap:8px;margin-top:12px}.svBookAdminList div{padding:10px;border:1px solid var(--line);border-radius:10px}.svBookAdminList small{display:block;color:var(--muted);margin-top:4px}
+svAdminCard{border:2px solid #f0b429;box-shadow:0 8px 28px rgba(120,80,0,.12)}
 .svAdminTop{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .svAdminBadge{display:inline-block;background:#fff0b8;color:#805400;border:1px solid #e7b33b;border-radius:30px;padding:6px 12px;font-size:11px;font-weight:900;letter-spacing:.7px;margin-bottom:8px}
 .svAdminTop h2{color:#6d4c00}.svAdminTop p,.svEditorHelp{color:#64748b;font-size:13px;margin-top:5px}
@@ -2218,6 +3001,30 @@ svAdminCss.textContent=`
 .svActionRow{display:flex;flex-wrap:wrap;gap:8px}
 .svDivider{border:0;border-top:1px solid #e5e7eb;margin:20px 0}
 @media(max-width:760px){.svAdminGrid{grid-template-columns:1fr}.svRichEditor{min-height:230px}.svAdminTop{align-items:flex-start}}
+.svQuickTitle{font-size:19px;font-weight:900;color:#805400;margin:18px 0 10px}
+.svQuickActions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 20px}
+.svQuickAction{border:0;border-radius:15px;padding:15px 12px;text-align:left;cursor:pointer;color:#172033;box-shadow:0 5px 16px rgba(20,30,60,.10);transition:transform .18s,box-shadow .18s;min-height:126px;font-family:inherit}
+.svQuickAction:hover{transform:translateY(-3px);box-shadow:0 9px 22px rgba(20,30,60,.16)}
+.svQuickAction span{display:block;font-size:27px;margin-bottom:6px}
+.svQuickAction b{display:block;font-size:14px}
+.svQuickAction small{display:block;font-size:11px;margin-top:4px;opacity:.78}
+.svQuickAction.book{background:linear-gradient(135deg,#dbeafe,#bfdbfe)}
+.svQuickAction.chapter{background:linear-gradient(135deg,#dcfce7,#bbf7d0)}
+.svQuickAction.topic{background:linear-gradient(135deg,#fce7f3,#fbcfe8)}
+.svQuickAction.theme{background:linear-gradient(135deg,#fef3c7,#fde68a)}
+#svBookSection,#svChapterSection,#svTopicSection,#svThemeSection{scroll-margin-top:22px}
+@media(max-width:760px){.svQuickActions{grid-template-columns:repeat(2,minmax(0,1fr))}.svQuickAction{min-height:112px}}
+`;
+svAdminCss.textContent += `
+/* StudyVerse editor accordion: keep inactive boxes compact */
+#svNewTopicSections .svSectionCard .svToolbar,
+#svNewTopicSections .svSectionCard .svSectionEditor{display:none}
+#svNewTopicSections .svSectionCard.active .svToolbar,
+#svNewTopicSections .svSectionCard.active .svSectionEditor{display:flex}
+#svNewTopicSections .svSectionCard.active .svSectionEditor{display:block}
+#svNewTopicSections .svSectionCard{padding:10px}
+#svNewTopicSections .svSectionOpen{cursor:pointer}
+.svToolbar button{touch-action:manipulation}
 `;
 document.head.appendChild(svAdminCss);
 
@@ -2226,6 +3033,7 @@ const lastState=JSON.parse(localStorage.getItem('sv_last')||'null');
 if(lastState&&CHAPTERS[lastState.chIdx]){chIdx=lastState.chIdx;setCh(chIdx);if(ALL[lastState.cur])goTo(lastState.cur);}else{setCh(0);}
 
 </script>
+
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js';
@@ -2284,6 +3092,38 @@ function enterAdmin(user) {
   if (sub) sub.textContent = `StudyVerse — Admin: ${user.email}`;
 }
 
+// Firestore does not support arrays nested inside arrays. To avoid this
+// limitation at every depth, keep only the top-level topics/chapters arrays
+// as arrays and encode every array below them as a tagged map.
+function svPackForFirestore(value, keepRootArray = false) {
+  if (Array.isArray(value)) {
+    const packedItems = value.map(item => svPackForFirestore(item, false));
+    return keepRootArray
+      ? packedItems
+      : { __svFirestoreArray__: true, items: packedItems };
+  }
+  if (value && typeof value === 'object') {
+    const out = {};
+    for (const [key, item] of Object.entries(value)) {
+      out[key] = svPackForFirestore(item, false);
+    }
+    return out;
+  }
+  return value;
+}
+function svUnpackFromFirestore(value) {
+  if (Array.isArray(value)) return value.map(svUnpackFromFirestore);
+  if (value && typeof value === 'object') {
+    if (value.__svFirestoreArray__ === true && Array.isArray(value.items)) {
+      return value.items.map(svUnpackFromFirestore);
+    }
+    const out = {};
+    for (const [key, item] of Object.entries(value)) out[key] = svUnpackFromFirestore(item);
+    return out;
+  }
+  return value;
+}
+
 let liveSyncStarted = false;
 function startLiveSync() {
   if (liveSyncStarted) return;
@@ -2293,8 +3133,9 @@ function startLiveSync() {
     if (snap.exists()) {
       const data = snap.data();
       if (Array.isArray(data.topics) && Array.isArray(data.chapters) && data.chapters.length) {
-        ALL.splice(0, ALL.length, ...data.topics);
-        CHAPTERS.splice(0, CHAPTERS.length, ...data.chapters);
+        const restored = svUnpackFromFirestore(data);
+        ALL.splice(0, ALL.length, ...restored.topics);
+        CHAPTERS.splice(0, CHAPTERS.length, ...restored.chapters);
         localStorage.setItem('sv_admin_data', JSON.stringify({ topics: ALL, chapters: CHAPTERS }));
         buildSb();
         if (dashboardMode) showDashboard();
@@ -2320,8 +3161,8 @@ window.svPushToCloud = async function() {
   try {
     const contentRef = doc(db, 'studyverse_live', 'main_content');
     await setDoc(contentRef, {
-      topics: JSON.parse(JSON.stringify(ALL)),
-      chapters: JSON.parse(JSON.stringify(CHAPTERS)),
+      topics: svPackForFirestore(JSON.parse(JSON.stringify(ALL)), true),
+      chapters: svPackForFirestore(JSON.parse(JSON.stringify(CHAPTERS)), true),
       updatedAt: new Date().toISOString()
     });
     console.log('StudyVerse cloud sync complete');
@@ -2376,3 +3217,4 @@ onAuthStateChanged(auth, async (user) => {
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
+
