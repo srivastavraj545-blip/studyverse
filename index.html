@@ -2333,7 +2333,7 @@ function svInsertMedia(kind){
  if(kind==='link'){const u=document.getElementById('svLinkUrl').value.trim();const label=document.getElementById('svLinkText').value.trim()||u;if(!/^https?:\/\//i.test(u))return alert('पूरा http:// या https:// लिंक डालें');document.execCommand('insertHTML',false,`<p><a href="${escapeAttr(u)}" target="_blank" rel="noopener noreferrer">${escapeText(label)}</a></p>`);}
 }
 function svSaveRichTopic(){const i=+document.getElementById('svAdmTopic').value,n=document.getElementById('admTitle').value.trim();if(!n)return alert('Topic title लिखें');ALL[i].n=n;ALL[i].html=document.getElementById('svRichEditor').innerHTML;savedTopicEdits[i]={n,html:ALL[i].html};localStorage.setItem('sv_topic_edits',JSON.stringify(savedTopicEdits));svSaveAdminData();alert('Topic सेव हो गया। Firebase Sync पूरा होने दें।');adminPanel();}
-function svApplyTheme(){const p=document.getElementById('svThemeColor').value,b=document.getElementById('svBgColor').value;document.documentElement.style.setProperty('--primary',p);document.documentElement.style.setProperty('--bg',b);localStorage.setItem('sv_theme',JSON.stringify({p,b}));svSaveAdminData();alert('Theme लागू कर दी गई।');}
+function svApplyTheme(){const p=document.getElementById('svThemeColor').value,b=document.getElementById('svBgColor').value;document.documentElement.style.setProperty('--primary',p);document.documentElement.style.setProperty('--bg',b);localStorage.setItem('sv_theme',JSON.stringify({p,b}));if(typeof window.svSaveThemeToCloud==='function')window.svSaveThemeToCloud({primary:p,bg:b});else alert('Firebase अभी तैयार नहीं है। पेज लोड होने के बाद दोबारा Apply करें।');}
 
 function escapeAttr(v){return String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 function escapeText(v){return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -2719,12 +2719,37 @@ function svSaveTopicFullEdit(){
 }
 function svApplyFullTheme(){
  const ids={primary:'svThemeColor',accent:'svThemeColor2',bg:'svBgColor',card:'svCardColor',text:'svTextColor',header:'svHeaderColor',sidebar:'svSidebarColor',link:'svLinkColor',ok:'svSuccessColor',warning:'svWarningColor'};
- Object.entries(ids).forEach(([k,id])=>{const v=document.getElementById(id)?.value;if(v)document.documentElement.style.setProperty('--'+k,v);});
- document.documentElement.style.setProperty('--card-radius',(document.getElementById('svCardRound')?.value||16)+'px');
- if(document.getElementById('svThemePreset')?.value==='dark'){document.documentElement.style.setProperty('--bg','#111827');document.documentElement.style.setProperty('--card','#1f2937');document.documentElement.style.setProperty('--text','#f9fafb');}
- alert('रंग बदल गए।');
+ const theme={};
+ Object.entries(ids).forEach(([k,id])=>{const v=document.getElementById(id)?.value;if(v){theme[k]=v;document.documentElement.style.setProperty('--'+k,v);}});
+ theme['card-radius']=Math.max(4,Math.min(28,Number(document.getElementById('svCardRound')?.value)||16))+'px';
+ theme.preset=document.getElementById('svThemePreset')?.value||'soft';
+ if(theme.preset==='dark'){theme.bg='#111827';theme.card='#1f2937';theme.text='#f9fafb';}
+ Object.entries(theme).forEach(([k,v])=>{if(k!=='preset')document.documentElement.style.setProperty('--'+k,v);});
+ document.documentElement.style.setProperty('--primary2',theme.accent||'#7c6cf6');
+ document.documentElement.style.setProperty('--ink',theme.text||'#202536');
+ document.documentElement.style.setProperty('--radius',theme['card-radius']||'16px');
+ localStorage.setItem('sv_theme_full',JSON.stringify(theme));
+ if(typeof window.svSaveThemeToCloud==='function') window.svSaveThemeToCloud(theme);
+ else alert('Theme इस डिवाइस पर लागू हुई है। Firebase कनेक्शन तैयार नहीं है—पेज लोड होने के बाद फिर Save करें।');
 }
-function svResetFullTheme(){['primary','accent','bg','card','text','header','sidebar','link','ok','warning','card-radius'].forEach(k=>document.documentElement.style.removeProperty('--'+k));alert('Default colors वापस आ गए।');}
+function svResetFullTheme(){
+ const theme={primary:'#4f46e5',accent:'#f59e0b',bg:'#f1f3f9',card:'#ffffff',text:'#202536',header:'#171b35',sidebar:'#202744',link:'#2563eb',ok:'#16a34a',warning:'#f59e0b','card-radius':'16px',preset:'soft'};
+ Object.entries(theme).forEach(([k,v])=>{if(k!=='preset')document.documentElement.style.setProperty('--'+k,v);});
+ document.documentElement.style.setProperty('--primary2',theme.accent||'#7c6cf6');
+ document.documentElement.style.setProperty('--ink',theme.text||'#202536');
+ document.documentElement.style.setProperty('--radius',theme['card-radius']||'16px');
+ localStorage.setItem('sv_theme_full',JSON.stringify(theme));
+ if(typeof window.svSaveThemeToCloud==='function') window.svSaveThemeToCloud(theme);
+ const ids={primary:'svThemeColor',accent:'svThemeColor2',bg:'svBgColor',card:'svCardColor',text:'svTextColor',header:'svHeaderColor',sidebar:'svSidebarColor',link:'svLinkColor',ok:'svSuccessColor',warning:'svWarningColor'};
+ Object.entries(ids).forEach(([k,id])=>{const el=document.getElementById(id);if(el)el.value=theme[k];});
+ const round=document.getElementById('svCardRound');if(round)round.value=16;
+ const preset=document.getElementById('svThemePreset');if(preset)preset.value='soft';
+}
+function svLoadThemeControls(){
+ const ids={primary:'svThemeColor',accent:'svThemeColor2',bg:'svBgColor',card:'svCardColor',text:'svTextColor',header:'svHeaderColor',sidebar:'svSidebarColor',link:'svLinkColor',ok:'svSuccessColor',warning:'svWarningColor'};
+ Object.entries(ids).forEach(([k,id])=>{const el=document.getElementById(id);const v=getComputedStyle(document.documentElement).getPropertyValue('--'+k).trim();if(el&&/^#[0-9a-f]{6}$/i.test(v))el.value=v;});
+ const r=document.getElementById('svCardRound');if(r)r.value=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-radius'))||16;
+}
 function svShowAdminTool(which){
  const host=document.getElementById('svAdminToolPanels'); if(!host)return;
  const books=SV_BOOKS.map((b,i)=>`<option value="${i}">${escapeText(b.icon||'📚')} ${escapeText(b.title)}</option>`).join('');
@@ -2796,6 +2821,7 @@ function svShowAdminTool(which){
   <label>Chapter का विवरण</label><input id="svEditChapterHi" class="admInput">
   <button class="quizBtn" onclick="svSaveChapterEdit()">💾 Save Chapter Changes</button>`);
  host.innerHTML=out+`<button class="quizBtn svCloseTool" onclick="document.getElementById('svAdminToolPanels').innerHTML='<div class=&quot;svToolWelcome&quot;>ऊपर से कोई Admin विकल्प चुनें।</div>'">✕ Close</button>`;
+ if(which==='theme')svLoadThemeControls();
  if(which==='editChapter')svLoadChapterForEdit();
  if(which==='topic')svRefreshNewTopicChapters();
  if(which==='editTopic')svRefreshEditTopicChapters();
@@ -2844,7 +2870,8 @@ function svApplyDemoTheme(){
  document.documentElement.style.setProperty('--primary2',p2);
  document.documentElement.style.setProperty('--bg',b);
  localStorage.setItem('sv_theme',JSON.stringify({p,p2,b}));
- alert('Home Page की Demo Theme लागू हो गई।');
+ if(typeof window.svSaveThemeToCloud==='function')window.svSaveThemeToCloud({primary:p,accent:p2,bg:b});
+ else alert('Firebase अभी तैयार नहीं है। पेज लोड होने के बाद दोबारा Apply करें।');
 }
 function svCmd(cmd){document.getElementById('svRichEditor')?.focus();document.execCommand(cmd,false,null);}
 function svFontSize(size){if(size){document.getElementById('svRichEditor')?.focus();document.execCommand('fontSize',false,size);}}
@@ -3061,6 +3088,69 @@ const db = getFirestore(app);
 window.svIsAdmin = false;
 window.svCurrentUser = null;
 
+const SV_THEME_DEFAULTS = {
+  primary:'#4f46e5', accent:'#f59e0b', bg:'#f1f3f9', card:'#ffffff',
+  text:'#202536', header:'#171b35', sidebar:'#202744', link:'#2563eb',
+  ok:'#16a34a', warning:'#f59e0b', 'card-radius':'16px', preset:'soft'
+};
+let svCurrentTheme = {...SV_THEME_DEFAULTS};
+function svApplyThemeData(raw) {
+  const data = raw && typeof raw === 'object' ? raw : {};
+  const next = {...SV_THEME_DEFAULTS};
+  for (const key of Object.keys(SV_THEME_DEFAULTS)) {
+    if (key === 'preset') continue;
+    const value = data[key];
+    if (key === 'card-radius') {
+      const n = parseInt(value, 10);
+      if (Number.isFinite(n)) next[key] = Math.max(4, Math.min(28, n)) + 'px';
+    } else if (typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value)) {
+      next[key] = value;
+    }
+  }
+  if (['soft','vivid','dark'].includes(data.preset)) next.preset = data.preset;
+  if (next.preset === 'dark') { next.bg='#111827'; next.card='#1f2937'; next.text='#f9fafb'; }
+  svCurrentTheme = next;
+  for (const [key,value] of Object.entries(next)) {
+    if (key !== 'preset') document.documentElement.style.setProperty('--'+key, value);
+  }
+  document.documentElement.style.setProperty('--primary2', next.accent);
+  document.documentElement.style.setProperty('--ink', next.text);
+  document.documentElement.style.setProperty('--radius', next['card-radius']);
+  try { localStorage.setItem('sv_theme_full', JSON.stringify(next)); } catch(e) {}
+  const ids={primary:'svThemeColor',accent:'svThemeColor2',bg:'svBgColor',card:'svCardColor',text:'svTextColor',header:'svHeaderColor',sidebar:'svSidebarColor',link:'svLinkColor',ok:'svSuccessColor',warning:'svWarningColor'};
+  for (const [key,id] of Object.entries(ids)) { const el=document.getElementById(id); if(el) el.value=next[key]; }
+  const round=document.getElementById('svCardRound'); if(round) round.value=parseInt(next['card-radius'],10)||16;
+  const preset=document.getElementById('svThemePreset'); if(preset) preset.value=next.preset;
+}
+window.svSaveThemeToCloud = async function(changes={}) {
+  if (!window.svIsAdmin) { alert('Theme सेव करने के लिए Admin Login जरूरी है।'); return; }
+  const merged = {...svCurrentTheme, ...changes};
+  svApplyThemeData(merged);
+  try {
+    await setDoc(doc(db, 'studyverse_live', 'theme_settings'), {
+      ...svCurrentTheme,
+      updatedAt: new Date().toISOString(),
+      updatedBy: (window.svCurrentUser && window.svCurrentUser.email) || ''
+    });
+    alert('Theme Firestore में सेव हो गई। Refresh करने पर भी यही रंग रहेंगे।');
+  } catch (err) {
+    console.error('StudyVerse theme save error:', err);
+    alert('Theme सेव नहीं हुई। Firebase Firestore Rules जाँचें: ' + (err.code || err.message));
+  }
+};
+let themeSyncStarted = false;
+function startThemeSync() {
+  if (themeSyncStarted) return;
+  themeSyncStarted = true;
+  onSnapshot(doc(db, 'studyverse_live', 'theme_settings'), (snap) => {
+    if (snap.exists()) svApplyThemeData(snap.data());
+    else svApplyThemeData(SV_THEME_DEFAULTS);
+  }, (err) => {
+    console.error('StudyVerse theme read error:', err);
+    // Keep the currently displayed/default theme if Firestore read is denied.
+  });
+}
+
 window.svOpenAdminLogin = function() {
   gate.style.display = 'flex';
   msg.textContent = 'Admin Google Account से प्रवेश करें।';
@@ -3126,16 +3216,33 @@ function svUnpackFromFirestore(value) {
 
 let liveSyncStarted = false;
 function startLiveSync() {
+  startThemeSync();
   if (liveSyncStarted) return;
   liveSyncStarted = true;
   const contentRef = doc(db, 'studyverse_live', 'main_content');
   onSnapshot(contentRef, (snap) => {
     if (snap.exists()) {
       const data = snap.data();
-      if (Array.isArray(data.topics) && Array.isArray(data.chapters) && data.chapters.length) {
-        const restored = svUnpackFromFirestore(data);
-        ALL.splice(0, ALL.length, ...restored.topics);
-        CHAPTERS.splice(0, CHAPTERS.length, ...restored.chapters);
+      // New format stores content as JSON strings. This avoids Firestore's
+      // reserved field-name and nested-array restrictions in rich lesson data.
+      let restoredTopics = null;
+      let restoredChapters = null;
+      try {
+        if (typeof data.topicsJson === 'string' && typeof data.chaptersJson === 'string') {
+          restoredTopics = JSON.parse(data.topicsJson);
+          restoredChapters = JSON.parse(data.chaptersJson);
+        } else if (Array.isArray(data.topics) && Array.isArray(data.chapters)) {
+          // Backward compatibility with older documents.
+          const legacy = svUnpackFromFirestore(data);
+          restoredTopics = legacy.topics;
+          restoredChapters = legacy.chapters;
+        }
+      } catch (parseErr) {
+        console.error('StudyVerse content parse error:', parseErr);
+      }
+      if (Array.isArray(restoredTopics) && Array.isArray(restoredChapters) && restoredChapters.length) {
+        ALL.splice(0, ALL.length, ...restoredTopics);
+        CHAPTERS.splice(0, CHAPTERS.length, ...restoredChapters);
         localStorage.setItem('sv_admin_data', JSON.stringify({ topics: ALL, chapters: CHAPTERS }));
         buildSb();
         if (dashboardMode) showDashboard();
@@ -3160,9 +3267,12 @@ window.svPushToCloud = async function() {
   }
   try {
     const contentRef = doc(db, 'studyverse_live', 'main_content');
+    // Store rich content as JSON strings. Firestore treats these as plain
+    // strings, so nested arrays and special object keys inside lesson data
+    // cannot invalidate the document structure.
     await setDoc(contentRef, {
-      topics: svPackForFirestore(JSON.parse(JSON.stringify(ALL)), true),
-      chapters: svPackForFirestore(JSON.parse(JSON.stringify(CHAPTERS)), true),
+      topicsJson: JSON.stringify(ALL),
+      chaptersJson: JSON.stringify(CHAPTERS),
       updatedAt: new Date().toISOString()
     });
     console.log('StudyVerse cloud sync complete');
@@ -3215,7 +3325,7 @@ onAuthStateChanged(auth, async (user) => {
 });
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+
 </body>
 </html>
 
