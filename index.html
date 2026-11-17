@@ -3100,7 +3100,7 @@ function svPackForFirestore(value, keepRootArray = false) {
     const packedItems = value.map(item => svPackForFirestore(item, false));
     return keepRootArray
       ? packedItems
-      : { __svFirestoreArray__: true, items: packedItems };
+      : { svFirestoreArray: true, items: packedItems };
   }
   if (value && typeof value === 'object') {
     const out = {};
@@ -3114,7 +3114,7 @@ function svPackForFirestore(value, keepRootArray = false) {
 function svUnpackFromFirestore(value) {
   if (Array.isArray(value)) return value.map(svUnpackFromFirestore);
   if (value && typeof value === 'object') {
-    if (value.__svFirestoreArray__ === true && Array.isArray(value.items)) {
+    if (value.svFirestoreArray === true && Array.isArray(value.items)) {
       return value.items.map(svUnpackFromFirestore);
     }
     const out = {};
@@ -3214,6 +3214,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
