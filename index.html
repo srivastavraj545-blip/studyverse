@@ -3541,6 +3541,43 @@ function svUnpackFromFirestore(value) {
 }
 
 let liveSyncStarted = false;
+
+// Keep the five built-in English chapters available even when Firebase
+// contains an older catalogue that was saved before the English Book existed.
+const SV_BUILTIN_ENGLISH_TOPICS = ALL.slice(
+  ENGLISH_CH1_START,
+  ENGLISH_CH5_START + ENGLISH_CH5_TOPICS.length
+);
+const SV_BUILTIN_ENGLISH_CHAPTERS = CHAPTERS
+  .filter(c => c.bookId === 'copa_english')
+  .map(c => ({...c, parts: Array.isArray(c.parts) ? c.parts.map(x => Array.isArray(x) ? [...x] : x) : []}));
+
+function svMergeBuiltInEnglishBook(restoredTopics, restoredChapters) {
+  for (const builtChapter of SV_BUILTIN_ENGLISH_CHAPTERS) {
+    const existingIndex = restoredChapters.findIndex(c => c.name === builtChapter.name);
+    if (existingIndex >= 0) {
+      // Older Firebase snapshots may have the chapter but not its bookId.
+      restoredChapters[existingIndex].bookId = 'copa_english';
+      continue;
+    }
+
+    const relativeStart = builtChapter.start - ENGLISH_CH1_START;
+    const chapterTopics = SV_BUILTIN_ENGLISH_TOPICS.slice(
+      relativeStart,
+      relativeStart + builtChapter.count
+    );
+    const newStart = restoredTopics.length;
+    restoredTopics.push(...chapterTopics);
+    restoredChapters.push({
+      ...builtChapter,
+      start: newStart,
+      count: chapterTopics.length,
+      bookId: 'copa_english'
+    });
+  }
+  return {topics: restoredTopics, chapters: restoredChapters};
+}
+
 function startLiveSync() {
   startThemeSync();
   if (liveSyncStarted) return;
@@ -3567,6 +3604,10 @@ function startLiveSync() {
         console.error('StudyVerse content parse error:', parseErr);
       }
       if (Array.isArray(restoredTopics) && Array.isArray(restoredChapters) && restoredChapters.length) {
+        // Merge built-in English Chapters 1–5 into older cloud content instead
+        // of allowing an old Firebase snapshot to hide the English Book.
+        ({topics: restoredTopics, chapters: restoredChapters} =
+          svMergeBuiltInEnglishBook(restoredTopics, restoredChapters));
         ALL.splice(0, ALL.length, ...restoredTopics);
         CHAPTERS.splice(0, CHAPTERS.length, ...restoredChapters);
         localStorage.setItem('sv_admin_data', JSON.stringify({ topics: ALL, chapters: CHAPTERS }));
