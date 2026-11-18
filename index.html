@@ -2558,6 +2558,11 @@ let SV_BOOKS = [
 ];
 function svSaveBooks(){ localStorage.setItem('sv_books', JSON.stringify(SV_BOOKS)); }
 CHAPTERS.forEach(c=>{if(!c.bookId)c.bookId='copa';});
+// Robustly identify the five built-in English chapters even if an older saved/admin state omitted bookId.
+function svChapterBelongsToBook(c, bookId){
+ if ((c.bookId||'copa')===bookId) return true;
+ return bookId==='copa_english' && Number.isInteger(c.start) && c.start>=ENGLISH_CH1_START && c.start<ENGLISH_CH5_START+ENGLISH_CH5_TOPICS.length;
+}
 let chIdx=0;
 let cur=0; // start of Chapter 1
 const done=new Set(JSON.parse(localStorage.getItem('sv_done')||'[]'));
@@ -2579,7 +2584,7 @@ function showDashboard(){
  dashboardMode=true;document.getElementById('content').style.display='none';document.querySelector('.nav').style.display='none';
  const d=document.getElementById('dashboard');d.style.display='block';
  const bookCards=SV_BOOKS.map(b=>{
-  const count=CHAPTERS.filter(c=>(c.bookId||'copa')===b.id).length;
+  const count=CHAPTERS.filter(c=>svChapterBelongsToBook(c,b.id)).length;
   return `<button class="card svBookCard svBookSelect" onclick="svOpenBook('${svEscapeHTML(b.id)}')"><div style="font-size:34px">${b.icon||'📚'}</div><h3>${escapeText(b.title)}</h3><p>${escapeText(b.description||'')}</p><b>${count} Chapters</b><span>Open Book →</span></button>`;
  }).join('');
  d.innerHTML=`<h2 class="svHomeTitle">📚 आपकी किताबें</h2><div class="svBookGrid">${bookCards}</div><div id="svBookChapters"></div>`;
@@ -2588,7 +2593,7 @@ function showDashboard(){
 function svOpenBook(bookId){
  svSelectedBookId=bookId;
  const book=SV_BOOKS.find(b=>b.id===bookId);if(!book)return;
- const chapters=CHAPTERS.map((c,i)=>({c,i})).filter(x=>(x.c.bookId||'copa')===bookId);
+ const chapters=CHAPTERS.map((c,i)=>({c,i})).filter(x=>svChapterBelongsToBook(x.c,bookId));
  const host=document.getElementById('svBookChapters');if(!host)return;
  host.innerHTML=`<section class="card svBookChapterPanel"><button class="svBackBooks" onclick="showDashboard()">← सभी Books</button><h2>${book.icon||'📚'} ${escapeText(book.title)}</h2><p>${escapeText(book.description||'')}</p><h3>इस Book के Chapters</h3>
  <div class="svChapterGrid">${chapters.length?chapters.map(({c,i})=>`<article class="card dashCard"><div style="font-size:25px">${c.icon||'📖'}</div><h3>${escapeText(c.name)}</h3><p>${escapeText(c.hi||'')}</p><b>${c.count} Topics</b><button class="quizBtn" onclick="dashboardOpenChapter(${i})">Open Chapter →</button></article>`).join(''):'<p>इस Book में अभी Chapter नहीं जोड़ा गया है।</p>'}</div></section>`;
