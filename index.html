@@ -3542,42 +3542,93 @@ function svUnpackFromFirestore(value) {
 
 let liveSyncStarted = false;
 
-// Keep the five built-in English chapters available even when Firebase
-// contains an older catalogue that was saved before the English Book existed.
-const SV_BUILTIN_ENGLISH_TOPICS = ALL.slice(
-  ENGLISH_CH1_START,
-  ENGLISH_CH5_START + ENGLISH_CH5_TOPICS.length
-);
-const SV_BUILTIN_ENGLISH_CHAPTERS = CHAPTERS
-  .filter(c => c.bookId === 'copa_english')
-  .map(c => ({...c, parts: Array.isArray(c.parts) ? c.parts.map(x => Array.isArray(x) ? [...x] : x) : []}));
+// Canonical catalogue embedded in this HTML: Hindi Chapters 1–5 and
+// English Chapters 1–5. Firebase may contain an older/partial snapshot.
+const SV_BUILTIN_TOPICS = ALL.slice();
+const SV_BUILTIN_CHAPTERS = CHAPTERS.map(c => ({
+  ...c,
+  parts: Array.isArray(c.parts) ? c.parts.map(x => Array.isArray(x) ? [...x] : x) : []
+}));
 
-function svMergeBuiltInEnglishBook(restoredTopics, restoredChapters) {
-  for (const builtChapter of SV_BUILTIN_ENGLISH_CHAPTERS) {
-    const existingIndex = restoredChapters.findIndex(c => c.name === builtChapter.name);
-    if (existingIndex >= 0) {
-      // Older Firebase snapshots may have the chapter but not its bookId.
-      restoredChapters[existingIndex].bookId = 'copa_english';
-      continue;
+function svMergeBuiltInCatalogue(restoredTopics, restoredChapters) {
+  const cloudTopics = Array.isArray(restoredTopics) ? restoredTopics : [];
+  const cloudChapters = Array.isArray(restoredChapters) ? restoredChapters : [];
+  const builtinNames = new Set(SV_BUILTIN_CHAPTERS.map(c => c.name));
+  const mergedTopics = [];
+  const mergedChapters = [];
+
+  // Rebuild every built-in chapter in its original order. Use cloud-edited
+  // content only when its topic range is valid and starts with the expected
+  // chapter topic; otherwise restore that chapter from this HTML file.
+  for (const built of SV_BUILTIN_CHAPTERS) {
+    const saved = cloudChapters.find(c => c && c.name === built.name);
+    let chapterTopics = null;
+    let savedStart = -1;
+
+    if (saved && Number.isInteger(saved.start) && Number.isInteger(saved.count) &&
+        saved.count >= built.count && saved.start >= 0 &&
+        saved.start + saved.count <= cloudTopics.length) {
+      const candidate = cloudTopics.slice(saved.start, saved.start + saved.count);
+      if (candidate.length && candidate[0] && candidate[0].n === SV_BUILTIN_TOPICS[built.start].n) {
+        chapterTopics = candidate;
+        savedStart = saved.start;
+      }
     }
 
-    const relativeStart = builtChapter.start - ENGLISH_CH1_START;
-    const chapterTopics = SV_BUILTIN_ENGLISH_TOPICS.slice(
-      relativeStart,
-      relativeStart + builtChapter.count
-    );
-    const newStart = restoredTopics.length;
-    restoredTopics.push(...chapterTopics);
-    restoredChapters.push({
-      ...builtChapter,
+    if (!chapterTopics) {
+      chapterTopics = SV_BUILTIN_TOPICS.slice(built.start, built.start + built.count);
+    }
+
+    const newStart = mergedTopics.length;
+    mergedTopics.push(...chapterTopics);
+
+    let parts = built.parts.map(p => [newStart + (p[0] - built.start), p[1]]);
+    if (saved && savedStart >= 0 && Array.isArray(saved.parts) && saved.parts.length) {
+      const remapped = saved.parts
+        .filter(p => Array.isArray(p) && Number.isInteger(p[0]) &&
+          p[0] >= savedStart && p[0] < savedStart + chapterTopics.length)
+        .map(p => [newStart + (p[0] - savedStart), p[1]]);
+      if (remapped.length) parts = remapped;
+    }
+
+    mergedChapters.push({
+      ...(saved || {}),
+      ...built,
       start: newStart,
       count: chapterTopics.length,
-      bookId: 'copa_english'
+      bookId: built.bookId || 'copa',
+      parts
     });
   }
-  return {topics: restoredTopics, chapters: restoredChapters};
-}
 
+  // Keep user-created chapters too, placing them after the ten built-in ones.
+  for (const custom of cloudChapters) {
+    if (!custom || builtinNames.has(custom.name)) continue;
+    const oldStart = Number.isInteger(custom.start) ? custom.start : 0;
+    const oldCount = Number.isInteger(custom.count) ? custom.count : 0;
+    const customTopics = oldCount > 0 && oldStart >= 0 &&
+      oldStart + oldCount <= cloudTopics.length
+      ? cloudTopics.slice(oldStart, oldStart + oldCount)
+      : [];
+    const newStart = mergedTopics.length;
+    mergedTopics.push(...customTopics);
+    const parts = Array.isArray(custom.parts)
+      ? custom.parts
+          .filter(p => Array.isArray(p) && Number.isInteger(p[0]) &&
+            p[0] >= oldStart && p[0] < oldStart + oldCount)
+          .map(p => [newStart + (p[0] - oldStart), p[1]])
+      : [];
+    mergedChapters.push({
+      ...custom,
+      start: newStart,
+      count: customTopics.length,
+      bookId: custom.bookId || 'copa',
+      parts
+    });
+  }
+
+  return {topics: mergedTopics, chapters: mergedChapters};
+}
 function startLiveSync() {
   startThemeSync();
   if (liveSyncStarted) return;
@@ -3604,10 +3655,10 @@ function startLiveSync() {
         console.error('StudyVerse content parse error:', parseErr);
       }
       if (Array.isArray(restoredTopics) && Array.isArray(restoredChapters) && restoredChapters.length) {
-        // Merge built-in English Chapters 1–5 into older cloud content instead
-        // of allowing an old Firebase snapshot to hide the English Book.
+        // Rebuild all built-in Hindi and English chapters from the HTML
+        // while retaining valid cloud edits and user-created chapters.
         ({topics: restoredTopics, chapters: restoredChapters} =
-          svMergeBuiltInEnglishBook(restoredTopics, restoredChapters));
+          svMergeBuiltInCatalogue(restoredTopics, restoredChapters));
         ALL.splice(0, ALL.length, ...restoredTopics);
         CHAPTERS.splice(0, CHAPTERS.length, ...restoredChapters);
         localStorage.setItem('sv_admin_data', JSON.stringify({ topics: ALL, chapters: CHAPTERS }));
