@@ -3381,9 +3381,107 @@ svAdminCss.textContent += `
 `;
 document.head.appendChild(svAdminCss);
 
+// GitHub batch chapter auto-loader: ONE HTML file can contain Hindi and English chapters.
+// Put files such as batch-06-07.html in /chapters/.
+// Each batch HTML must contain JSON in #studyverse-batch-data.
+const SV_GITHUB_REPO = 'srivastavraj545-blip/studyverse';
+const SV_EXTERNAL_BOOKS = {
+  hindi: {bookId:'copa', label:'Hindi COPA', icon:'📗'},
+  english: {bookId:'copa_english', label:'English Exam Notes', icon:'📘'}
+};
+let svExternalChapterData = [];
+let svExternalLoadDone = false;
+function svMakeExternalChapterId(file, index){ return 'github:chapters/'+file+'#'+index; }
+function svAppendExternalChapters(){
+  let added = false;
+  for (const item of svExternalChapterData) {
+    const id = item.id;
+    if (CHAPTERS.some(c => c && c.externalId === id)) continue;
+    const data = item.data;
+    const topics = data.topics;
+    if (!Array.isArray(topics) || !topics.length) continue;
+    const start = ALL.length;
+    topics.forEach(t => ALL.push({
+      n:String(t.n || t.title || 'Untitled Topic'),
+      hi:String(t.hi || ''),
+      icon:String(t.icon || '📘'),
+      html:String(t.html || t.content || '<p>इस Topic की सामग्री जल्द जोड़ी जाएगी।</p>'),
+      quiz:Array.isArray(t.quiz) ? t.quiz : []
+    }));
+    const parts = [];
+    let previousPart = null;
+    topics.forEach((t, index) => {
+      const part = String(t.part || '📘 '+data.name);
+      if (part !== previousPart) { parts.push([start + index, part]); previousPart = part; }
+    });
+    const book = SV_EXTERNAL_BOOKS[item.language];
+    CHAPTERS.push({
+      name:String(data.name),
+      hi:String(data.hi || (item.language==='english' ? 'English Exam Notes' : '')),
+      start, count:topics.length,
+      icon:String(data.icon || book.icon),
+      bookId:book.bookId,
+      parts,
+      externalId:id,
+      externalSource:true
+    });
+    added = true;
+  }
+  if (added) {
+    localStorage.setItem('sv_admin_data', JSON.stringify({topics:ALL, chapters:CHAPTERS}));
+    buildSb();
+    if (!dashboardMode) render(cur);
+    else if (!document.querySelector('.svAdmin')) showDashboard();
+  }
+}
+async function svLoadExternalChapters(){
+  if (svExternalLoadDone) return;
+  svExternalLoadDone = true;
+  const apiUrl = 'https://api.github.com/repos/'+SV_GITHUB_REPO+'/contents/chapters?ref=main';
+  const loaded = [];
+  try {
+    const listResponse = await fetch(apiUrl, {headers:{'Accept':'application/vnd.github+json'}});
+    if (!listResponse.ok) {
+      if (listResponse.status !== 404) console.warn('Chapter batch folder load:', listResponse.status);
+      return;
+    }
+    const files = await listResponse.json();
+    if (!Array.isArray(files)) return;
+    const batchFiles = files.filter(f => f && f.type==='file' && /^batch-(?!template(?:\.|$))[a-z0-9_-]+\.html$/i.test(f.name));
+    batchFiles.sort((a,b) => a.name.localeCompare(b.name, undefined, {numeric:true}));
+    for (const file of batchFiles) {
+      try {
+        const response = await fetch(file.download_url);
+        if (!response.ok) continue;
+        const source = await response.text();
+        const parsed = new DOMParser().parseFromString(source, 'text/html');
+        const dataNode = parsed.getElementById('studyverse-batch-data');
+        if (!dataNode) { console.warn('Missing studyverse-batch-data:', file.name); continue; }
+        const batch = JSON.parse(dataNode.textContent || '{}');
+        if (!Array.isArray(batch.chapters)) { console.warn('Invalid batch file:', file.name); continue; }
+        batch.chapters.forEach((chapter, index) => {
+          const language = String(chapter.language || '').toLowerCase();
+          if (!SV_EXTERNAL_BOOKS[language] || !chapter.name || !Array.isArray(chapter.topics) || !chapter.topics.length) {
+            console.warn('Skipped invalid chapter in batch:', file.name, index); return;
+          }
+          loaded.push({
+            id:svMakeExternalChapterId(file.name,index),
+            file:file.name,
+            language,
+            data:chapter
+          });
+        });
+      } catch (err) { console.warn('Could not load chapter batch:', file.name, err); }
+    }
+  } catch (err) { console.warn('External chapter batch loader:', err); }
+  svExternalChapterData = loaded;
+  svAppendExternalChapters();
+  console.info('StudyVerse external batch chapters loaded:', loaded.length);
+}
 buildSb();
 const lastState=JSON.parse(localStorage.getItem('sv_last')||'null');
 if(lastState&&CHAPTERS[lastState.chIdx]){chIdx=lastState.chIdx;setCh(chIdx);if(ALL[lastState.cur])goTo(lastState.cur);}else{setCh(0);}
+svLoadExternalChapters();
 
 </script>
 
@@ -3661,6 +3759,8 @@ function startLiveSync() {
           svMergeBuiltInCatalogue(restoredTopics, restoredChapters));
         ALL.splice(0, ALL.length, ...restoredTopics);
         CHAPTERS.splice(0, CHAPTERS.length, ...restoredChapters);
+        // Re-append GitHub chapters after every Firestore snapshot; they stay out of cloud data.
+        svAppendExternalChapters();
         localStorage.setItem('sv_admin_data', JSON.stringify({ topics: ALL, chapters: CHAPTERS }));
         buildSb();
         if (dashboardMode) showDashboard();
@@ -3688,9 +3788,24 @@ window.svPushToCloud = async function() {
     // Store rich content as JSON strings. Firestore treats these as plain
     // strings, so nested arrays and special object keys inside lesson data
     // cannot invalidate the document structure.
+    const cloudTopics = [];
+    const cloudChapters = [];
+    for (const chapter of CHAPTERS) {
+      if (chapter && chapter.externalSource) continue;
+      const oldStart = Number.isInteger(chapter.start) ? chapter.start : 0;
+      const oldCount = Number.isInteger(chapter.count) ? chapter.count : 0;
+      const newStart = cloudTopics.length;
+      if (oldCount > 0 && oldStart >= 0 && oldStart + oldCount <= ALL.length) {
+        cloudTopics.push(...ALL.slice(oldStart, oldStart + oldCount));
+      }
+      const parts = Array.isArray(chapter.parts) ? chapter.parts
+        .filter(p => Array.isArray(p) && Number.isInteger(p[0]) && p[0] >= oldStart && p[0] < oldStart + oldCount)
+        .map(p => [newStart + (p[0] - oldStart), p[1]]) : [];
+      cloudChapters.push({...chapter, start:newStart, count:cloudTopics.length-newStart, parts});
+    }
     await setDoc(contentRef, {
-      topicsJson: JSON.stringify(ALL),
-      chaptersJson: JSON.stringify(CHAPTERS),
+      topicsJson: JSON.stringify(cloudTopics),
+      chaptersJson: JSON.stringify(cloudChapters),
       updatedAt: new Date().toISOString()
     });
     console.log('StudyVerse cloud sync complete');
